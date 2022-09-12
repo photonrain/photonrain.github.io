@@ -202,15 +202,10 @@
 
 
 
-  </div>
-</body>
-</html> -->
-仅适用于15星以下武器卷轴逆推，简易粗糙试用版
+仅适用于15星以下武器卷轴逆推，试用版
 <form>
 </form>
-<a href="https://space.bilibili.com/44579584?spm_id_from=333.1007.0.0" target="_blank" title="转到B站主页">BY紫电NS</a>
-<form>
-</form>
+<a href="https://space.bilibili.com/44579584?spm_id_from=333.1007.0.0" target="_blank" title="转到B站主页">by紫电NS</a>
 <form>
     <div>
         <label>
@@ -226,7 +221,7 @@
     </div>
     <div>
         <label>
-            基础主属性：
+            主属性：
             <input type="baseatt" id="baseatt"/>
         </label>
     </div>
@@ -286,9 +281,8 @@
 
       		let Tatk = parseFloat(baseatk.value) + totalscatk;
 			let Tatt = parseFloat(baseatt.value) + totalscatt;
-			
 			for (let i=0;i<parseInt(starforce.value);i++){ 
-			Tatk = Math.ceil(Tatk/50) + Tatk;
+			Tatk = (Math.floor(Tatk/50)+1) + Tatk;
 			if(i<=4){
 				Tatt = 2 + Tatt;
 			}
@@ -296,11 +290,7 @@
 				Tatt = 3 + Tatt;
 			}
 			}
-			 console.log(Tatk);
-			 console.log(finalatk.value);
-			 console.log(Tatt);
-			 console.log(finalatt.value);
-			 console.log(correct);
+			 
 			if(Math.abs(Tatk-parseInt(finalatk.value))>0.01   ){
 				scrollatk = toPrecision(scrollatk,2) + 0.01;
 			}else{
@@ -333,4 +323,5 @@
     }
 
  </script>
+
 
