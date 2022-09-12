@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
@@ -204,4 +204,128 @@
 
   </div>
 </body>
-</html>
+</html> -->
+
+<form>
+    <div>
+        <label>
+            武器等级：
+            <input type="level" id ="level"/>
+        </label>
+    </div>
+    <div>
+        <label>
+            基础攻击力：
+            <input type="baseatk" id="baseatk"/>
+        </label>
+    </div>
+    <div>
+        <label>
+            主属性：
+            <input type="baseatt" id="baseatt"/>
+        </label>
+    </div>
+    <div>
+        <label>
+            星之力等级：
+            <input type="starforce" id="starforce"/>
+        </label>
+    </div>
+    <div>
+        <label>
+            最终攻击力（不含火花）：
+            <input type="finalatk" id="finalatk"/>
+        </label>
+    </div>
+    <div>
+        <label>
+            最终主属性（不含火花）：
+            <input type="finalatt" id="finalatt"/>
+        </label>
+    </div>
+    <div>
+        <label>
+            已用升级次数：
+            <input type="times" id="times"/>
+        </label>
+    </div>
+
+
+
+<button type="button" onclick="contxt()">计算</button>
+
+
+<script type="text/javascript">
+
+     function  contxt() //定义函数
+      {
+      	let level = document.getElementById("level");
+      	let baseatk = document.getElementById("baseatk");
+      	let att = document.getElementById("baseatt");
+      	let starforce = document.getElementById("starforce");
+      	let finalatk = document.getElementById("finalatk");
+      	let times = document.getElementById("times");
+         
+      	
+      	let scrollatk = 0;
+      	let scrollatt = 0;
+
+
+      	let correct = 0;
+      	let loop=0;
+      	 while(correct!=2){
+      		correct = 0;
+      		 let totalscatk = toPrecision(scrollatk * parseFloat(times.value),4);
+      		 let totalscatt = toPrecision(scrollatt * parseFloat(times.value),4);
+
+
+      		let Tatk = parseFloat(baseatk.value) + totalscatk;
+			let Tatt = parseFloat(baseatt.value) + totalscatt;
+			
+			for (let i=0;i<parseInt(starforce.value);i++){ 
+			Tatk = Math.ceil(Tatk/50) + Tatk;
+			if(i<=4){
+				Tatt = 2 + Tatt;
+			}
+			if(i>4){
+				Tatt = 3 + Tatt;
+			}
+			}
+			 console.log(Tatk);
+			 console.log(finalatk.value);
+			 console.log(Tatt);
+			 console.log(finalatt.value);
+			 console.log(correct);
+			if(Math.abs(Tatk-parseInt(finalatk.value))>0.01   ){
+				scrollatk = toPrecision(scrollatk,2) + 0.01;
+			}else{
+				correct++;
+			}
+      		
+      		if(Math.abs(Tatt-parseInt(finalatt.value))>0.05   ){
+				scrollatt = toPrecision(scrollatt,2) + 0.01;
+			}else{
+				correct++;
+			}
+
+		if(loop >5000){
+			break;
+		}
+		loop++;
+
+      	}
+      	alert("卷轴攻击力是:" +toPrecision(scrollatk,2)+"\n"  )
+      	alert("卷轴属性是:"   +toPrecision(scrollatt,2)+ "\n"  ); 
+        
+      }
+ </script>
+
+<script type="text/javascript">
+ function toPrecision(num, precision) {
+      if (precision === undefined) precision = this.numPrecision
+      // 这里在做乘法运算时要使用toFixed去四舍五入，防止精度丢失问题，比如1.255*100 !== 125.5
+      return parseFloat(Math.round((num * Math.pow(10, precision)).toFixed(precision)) / Math.pow(10, precision))
+    }
+
+ </script>
+
