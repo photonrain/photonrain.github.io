@@ -200,8 +200,7 @@
 
 
 
-
-仅适用于15星以下武器卷轴逆推，试用版。如果遇到BUG，请点击下方链接私信我，感谢您的支持。
+简易武器卷轴逆推，试用版。如果遇到BUG，请点击下方链接私信我，感谢您的支持。
 <form>
 </form>
 <a href="https://space.bilibili.com/44579584?spm_id_from=333.1007.0.0" target="_blank" title="转到B站主页">by紫电NS</a>
@@ -281,6 +280,16 @@
 		var mematt = [];
 		let attcorr=0;
 		let atkcorr=0;
+
+		let starforceatk = [[6,7,7,8,9],[7,8,8,9,10,11,12,30,31,32],[8,9,9,10,11,12,13,31,32,33],[9,9,10,11,12,13,14,32,33,34],[913,13,14,14,15,16,17,34,35,36]];
+		let starforceatt = [7,9,11,13,15];
+
+
+
+
+
+
+
       	 while(correct!=2){
       		correct = 0;
       		 let totalscatk = toPrecision(scrollatk * parseFloat(times.value),4);
@@ -289,25 +298,65 @@
       		let Tatk = parseFloat(baseatk.value) + totalscatk;
 			let Tatt = parseFloat(baseatt.value) + totalscatt;
 			//星之力部分
+			let superstar = 0;
 			for (let i=0;i<parseInt(starforce.value);i++){ 
 				if(i<=14){
 					Tatk = (Math.floor(Tatk/50)+1) + Tatk;
 				}else{
-
+					if(130<=parseInt(level.value)&&parseInt(level.value)<140){
+						Tatk = starforceatk[0][superstar]+ Tatk;
+					}
+					if(140<=parseInt(level.value)&&parseInt(level.value)<150){
+						Tatk = starforceatk[1][superstar]+ Tatk;
+					}
+					if(150<=parseInt(level.value)&&parseInt(level.value)<160){
+						Tatk = starforceatk[2][superstar]+ Tatk;
+					}
+					if(parseInt(level.value)==160){
+						Tatk = starforceatk[3][superstar]+ Tatk;
+					}
+					if(parseInt(level.value)==200){
+						Tatk = starforceatk[4][superstar]+ Tatk;
+					}
+					
 				}
-
 			if(i<=4){
 				Tatt = 2 + Tatt;
 			}
-			if(i>4){
+			if(4<i && i<=14){
 				Tatt = 3 + Tatt;
+			}
+			if(i>14){
+				if(130<=parseInt(level.value)&&parseInt(level.value)<140){
+					Tatt = starforceatt[0] + Tatt;
+					superstar++
+				}
+				if(140<=parseInt(level.value)&&parseInt(level.value)<150){
+					Tatt = starforceatt[1] + Tatt;
+					superstar++
+				}
+				if(150<=parseInt(level.value)&&parseInt(level.value)<160){
+					Tatt = starforceatt[2] + Tatt;
+					superstar++
+					// console.log("superstar");
+					// console.log(parseInt(starforceatt[superstar]));
+				}
+				if(160==parseInt(level.value)){
+					Tatt = starforceatt[3] + Tatt;
+					superstar++
+				}
+				if(200==parseInt(level.value)){
+					Tatt = starforceatt[4] + Tatt;
+					superstar++
+				}
+				
 			}
 			}
 			 //记录一下，主要是PB卷太麻烦了
 			 
 			 Datk[loop] = Math.abs(Tatk-parseInt(finalatk.value));
 			 Datt[loop] = Math.abs(Tatt-parseInt(finalatt.value));
-
+			 
 			  mematk[loop] = Tatk;
 			  mematt[loop] = Tatt;
 				
@@ -347,27 +396,28 @@
 				scrollatk = toPrecision(scrollatk,2) + 0.01;
 				scrollatt = toPrecision(scrollatt,2) + 0.01;
 			}
-			console.log(6)
+			// console.log(6)
 			
-			console.log(Datk[loop])
-			console.log(scrollatt)
-			console.log(minatk)
-			console.log(minatt)
+			// console.log(Datt[loop])
+			// console.log(scrollatk)
+			// console.log(scrollatt)
+			// console.log(minatk)
+			// console.log(minatt)
 
 			
 				//搜索与结果最相符的值
 		
 		loop++;
 		A++;
-		if(loop>1000){
+		if(loop>10000){
 			break;
 		}
       	}
 
+      	let outatk = toPrecision(scrollatk,2);
+      	let outatt = toPrecision(scrollatt,2);
 
-
-      	alert("卷轴攻击力是:" +toPrecision(scrollatk,2)+"\n"  )
-      	alert("卷轴属性是:"   +toPrecision(scrollatt,2)+ "\n"  ); 
+      	alert("卷轴攻击力"+outatk +"\n" +"卷轴属性" + outatt);
         
       }
  </script>
@@ -384,5 +434,7 @@
     }
 
  </script>
+
+
 
 
