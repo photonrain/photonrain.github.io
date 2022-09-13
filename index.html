@@ -201,8 +201,7 @@
 
 
 
-
-仅适用于15星以下武器卷轴逆推，试用版
+仅适用于15星以下武器卷轴逆推，试用版。如果遇到BUG，请点击下方链接私信我，感谢您的支持。
 <form>
 </form>
 <a href="https://space.bilibili.com/44579584?spm_id_from=333.1007.0.0" target="_blank" title="转到B站主页">by紫电NS</a>
@@ -221,7 +220,7 @@
     </div>
     <div>
         <label>
-            主属性：
+            基础主属性：
             <input type="baseatt" id="baseatt"/>
         </label>
     </div>
@@ -273,16 +272,28 @@
 
       	let correct = 0;
       	let loop=0;
+      	let A = -1;
+      	let minatk;
+		let minatt;
+		var Datk = [];
+		var Datt = [];
+		var mematk = [];
+		var mematt = [];
       	 while(correct!=2){
       		correct = 0;
       		 let totalscatk = toPrecision(scrollatk * parseFloat(times.value),4);
       		 let totalscatt = toPrecision(scrollatt * parseFloat(times.value),4);
 
-
       		let Tatk = parseFloat(baseatk.value) + totalscatk;
 			let Tatt = parseFloat(baseatt.value) + totalscatt;
+			//星之力部分
 			for (let i=0;i<parseInt(starforce.value);i++){ 
-			Tatk = (Math.floor(Tatk/50)+1) + Tatk;
+				if(i<=14){
+					Tatk = (Math.floor(Tatk/50)+1) + Tatk;
+				}else{
+
+				}
+
 			if(i<=4){
 				Tatt = 2 + Tatt;
 			}
@@ -290,30 +301,69 @@
 				Tatt = 3 + Tatt;
 			}
 			}
+			 //记录一下，主要是PB卷太麻烦了
 			 
-			if(Math.abs(Tatk-parseInt(finalatk.value))>0.01   ){
-				scrollatk = toPrecision(scrollatk,2) + 0.01;
-			}else{
-				correct++;
-			}
-      		
-      		if(Math.abs(Tatt-parseInt(finalatt.value))>0.05   ){
-				scrollatt = toPrecision(scrollatt,2) + 0.01;
-			}else{
-				correct++;
-			}
+			 Datk[loop] = Math.abs(Tatk-parseInt(finalatk.value));
+			 Datt[loop] = Math.abs(Tatt-parseInt(finalatt.value));
 
-		if(loop >5000){
+			  mematk[loop] = Tatk;
+			  mematt[loop] = Tatt;
+				
+			if(loop==0){
+				minatk = Datk[loop];
+				minatt = Datt[loop];
+			}else{
+
+			}
+				
+			if(loop>=0){
+				if( minatk >=Datk[loop] ){
+					scrollatk = toPrecision(scrollatk,2) + 0.01;
+					minatk = Datk[loop] ;
+				}else{
+					correct++;
+					minatk = minatk;
+				scrollatk = toPrecision(scrollatk,2) - 0.01
+				}
+	      		
+	      		if(minatt>=Datt[loop] ){
+					scrollatt = toPrecision(scrollatt,2) + 0.01;
+					minatt = Datt[loop] ;
+				}else{
+					correct++;
+					minatt = minatt;
+				scrollatt = toPrecision(scrollatt,2) - 0.01;
+				}
+			}else{
+				scrollatk = toPrecision(scrollatk,2) + 0.01;
+				scrollatt = toPrecision(scrollatt,2) + 0.01;
+			}
+			console.log(Datk[loop])
+			console.log(scrollatt)
+			console.log(minatk)
+			console.log(minatt)
+
+			
+				//搜索与结果最相符的值
+		
+		loop++;
+		A++;
+		if(loop>1000){
 			break;
 		}
-		loop++;
-
       	}
+
+
+
       	alert("卷轴攻击力是:" +toPrecision(scrollatk,2)+"\n"  )
       	alert("卷轴属性是:"   +toPrecision(scrollatt,2)+ "\n"  ); 
         
       }
  </script>
+
+
+
+
 
 <script type="text/javascript">
  function toPrecision(num, precision) {
