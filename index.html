@@ -279,6 +279,8 @@
 		var Datt = [];
 		var mematk = [];
 		var mematt = [];
+		let attcorr=0;
+		let atkcorr=0;
       	 while(correct!=2){
       		correct = 0;
       		 let totalscatk = toPrecision(scrollatk * parseFloat(times.value),4);
@@ -317,27 +319,36 @@
 			}
 				
 			if(loop>=0){
-				if( minatk >=Datk[loop] ){
+				if(atkcorr==0){
+					if( minatk >=Datk[loop] ){
 					scrollatk = toPrecision(scrollatk,2) + 0.01;
 					minatk = Datk[loop] ;
 				}else{
 					correct++;
 					minatk = minatk;
-				scrollatk = toPrecision(scrollatk,2) - 0.01
+					atkcorr=1;
+					scrollatk = toPrecision(scrollatk,2) - 0.01
 				}
-	      		
-	      		if(minatt>=Datt[loop] ){
+				}
+				
+	      		if(attcorr==0){
+	      			if(minatt>=Datt[loop] ){
 					scrollatt = toPrecision(scrollatt,2) + 0.01;
 					minatt = Datt[loop] ;
 				}else{
 					correct++;
 					minatt = minatt;
-				scrollatt = toPrecision(scrollatt,2) - 0.01;
+					attcorr=1;
+					scrollatt = toPrecision(scrollatt,2) - 0.01;
 				}
+	      		}
+	      		
 			}else{
 				scrollatk = toPrecision(scrollatk,2) + 0.01;
 				scrollatt = toPrecision(scrollatt,2) + 0.01;
 			}
+			console.log(6)
+			
 			console.log(Datk[loop])
 			console.log(scrollatt)
 			console.log(minatk)
