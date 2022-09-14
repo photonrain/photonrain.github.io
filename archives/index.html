@@ -442,8 +442,8 @@ let probability=[0,0.0083,
       		cubecost = cubecost+ loop;
       		cost = cost + loop * parseFloat(price.value);
       		cost = toPrecision(cost,2);
-      		if(mincost>=cost){
-      			mincost = cost;
+      		if(mincost>=loop * parseFloat(price.value)){
+      			mincost = loop * parseFloat(price.value);
       		}
       		if(maxcost<=loop * parseFloat(price.value)){
       			maxcost = loop * parseFloat(price.value);
