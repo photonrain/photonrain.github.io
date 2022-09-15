@@ -1,6 +1,15 @@
-<a href="https://photonrain.github.io/"  title="回到主页">首页</a>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>怪怪魔方模拟器</title>
+    <!-- 引入刚刚下载的 ECharts 文件 -->
+    <script src="echarts.js"></script>
+  </head>
+  <body>
+  <a href="https://photonrain.github.io/"  title="回到主页">首页</a>
 <br>
-简易怪怪魔方，试用版。如果遇到BUG，请点击下方链接私信我，感谢您的支持!
+简易怪怪魔方，试用版。如果遇到BUG，请点击下方链接私信我，感谢您的支持。
 <form>
 注：点击后无反应是由于还在计算，请耐心等待~
 </form>
@@ -155,7 +164,7 @@
 
 <button type="button" onclick="contxt()">统计计算</button>
 <!-- <button type="button" onclick="once()">单次模拟（无需设定目标属性）</button> -->
-
+<div id="main" style="width: 600px;height:400px;"></div>
 <script type="text/javascript">
 let probability=[0,0.014402838,
 0.028805676,
@@ -290,7 +299,55 @@ let probability=[0,0.014402838,
 	      
 	      half = parseFloat(price.value) * half;
 			alert("经过一千次测试"+"\n"+"平均使用魔方"+cubecost +"\n" +"平均花费" + cost+"\n"+"最欧的人花费"+mincost+"\n"+"运气最差的人花费"+maxcost+"\n"+"中位数花费为"+half);
-      	}
+      	var myChart = echarts.init(document.getElementById('main'));
+      let XAxis = [];
+      let YAxis = [];
+      let Axis =[];
+      let num = 0;
+      for(var L=parseInt(sortloop.length-1);L>=0;L--){
+        XAxis[num] = sortloop[L].toString();
+        YAxis[num] = (num*1/totalloop).toString();
+        Axis[num] = [YAxis[num],XAxis[num]] ;
+        num++
+      }
+      // 指定图表的配置项和数据
+       var option = {
+        title: {
+          text: '消耗魔方数量统计结果，平均为'+cubecost
+        },
+        tooltip: {},
+        legend: {
+          data: ['概率']
+        },
+        xAxis: { 
+          
+
+        },
+        yAxis: {
+          splitNumber: 10,
+          splitLine: {
+            show: true,
+            lineStyle: {
+              type: 'dotted',
+              color: 'rgba(255, 255, 255,0.3)'
+            }
+          }
+        },
+        series: [
+          {
+            name: '魔方数量',
+            type: 'scatter',
+            data: Axis
+          }
+        ]
+      };
+
+      // 使用刚指定的配置项和数据显示图表。
+      myChart.setOption(option);
+
+
+
+        }
 
 
 
@@ -313,3 +370,5 @@ let probability=[0,0.014402838,
 
  </script>
 
+ </body>
+</html>
