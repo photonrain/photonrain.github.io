@@ -1,4 +1,13 @@
-<a href="https://photonrain.github.io/"  title="回到主页">首页</a>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>附加魔方模拟器</title>
+    <!-- 引入刚刚下载的 ECharts 文件 -->
+    <script src="echarts.js"></script>
+  </head>
+  <body>
+  <a href="https://photonrain.github.io/"  title="回到主页">首页</a>
 <br>
 简易纹章附加魔方属性计算器，试用版。如果遇到BUG，请点击下方链接私信我，感谢您的支持。
 <br>
@@ -7,9 +16,6 @@
 <form>
 </form>
 <a href="https://space.bilibili.com/44579584?spm_id_from=333.1007.0.0" target="_blank" title="转到B站主页">by紫电NS</a>
-<form>
-</form>
-<a href="https://wiki.biligame.com/maplestory/%E9%A6%96%E9%A1%B5" target="_blank" title="转到Bwiki主页">特别鸣谢Bwiki数据支持</a>
 <form>
 暂时只有纹章附加<br>
 
@@ -34,13 +40,14 @@
         <label><input name="First" type="checkbox" value="12" /> 10级敏捷+2</label> 
         <label><input name="First" type="checkbox" value="13" /> 10级智力+2</label> 
         <label><input name="First" type="checkbox" value="14" /> 10级运气+2</label> 
-        <label style="color: red;"><input name="First" type="checkbox" value="15" /> 10级攻击力+1</label> 
-        <label style="color: red;"><input name="First" type="checkbox" value="16" /> 10级魔力+1</label> 
+        <label><input name="First" type="checkbox" value="15" /> 10级攻击力+1</label> 
+        <label><input name="First" type="checkbox" value="16" /> 10级魔力+1</label> 
         <br>
         <label><input name="First" type="checkbox" value="17" /> 无视5%</label> 
         <label><input name="First" type="checkbox" value="99" /> 任意</label>   
  
     </div>
+    <br>
     <div>
     <b>第二条属性</b>
          
@@ -82,8 +89,8 @@
         <label><input name="Second" type="checkbox" value="30" /> 10级敏捷+2</label> 
         <label><input name="Second" type="checkbox" value="31" /> 10级智力+2</label> 
         <label><input name="Second" type="checkbox" value="32" /> 10级运气+2</label> 
-        <label style="color: red;"><input name="Second" type="checkbox" value="33" /> 10级攻击力+1</label> 
-        <label style="color: red;"><input name="Second" type="checkbox" value="34" /> 10级魔力+1</label> 
+        <label><input name="Second" type="checkbox" value="33" /> 10级攻击力+1</label> 
+        <label><input name="Second" type="checkbox" value="34" /> 10级魔力+1</label> 
         <br>
         <label><input name="Second" type="checkbox" value="35" /> 无视5%</label> 
         <label><input name="Second" type="checkbox" value="99" /> 任意</label>  
@@ -208,8 +215,8 @@
         <label><input name="Third" type="checkbox" value="30" /> 10级敏捷+2</label> 
         <label><input name="Third" type="checkbox" value="31" /> 10级智力+2</label> 
         <label><input name="Third" type="checkbox" value="32" /> 10级运气+2</label> 
-        <label style="color: red;"><input name="Third" type="checkbox" value="33" /> 10级攻击力+1</label> 
-        <label style="color: red;"><input name="Third" type="checkbox" value="34" /> 10级魔力+1</label> 
+        <label><input name="Third" type="checkbox" value="33" /> 10级攻击力+1</label> 
+        <label><input name="Third" type="checkbox" value="34" /> 10级魔力+1</label> 
         <br>
         <label><input name="Third" type="checkbox" value="35" /> 无视5%</label> 
         <label><input name="Third" type="checkbox" value="99" /> 任意</label>  
@@ -229,7 +236,27 @@
 <!-- <button type="button" onclick="cleangroup()">清除潜能组</button> -->
 <button type="button" onclick="contxt()">统计计算</button>
 
+
+<div id="main" style="width: 600px;height:400px;"></div>
 <!-- <button type="button" onclick="once()">单次模拟（无需设定目标属性）</button> -->
+
+
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <script type="text/javascript">
 let probability1=[0,0.078947,
@@ -401,15 +428,15 @@ let probability2=[0,0.071073,
 
       		correct = correct + joker;
       		loop++;
-      		if(correct==3){
-//       			console.log(row[0]);
-// 			    console.log(rowstate[0]);
-//       			console.log(row[1]);
-// 			    console.log(rowstate[1]);
-//       			console.log(row[2]);
-//       			console.log(rowstate[2]);
-//       			console.log("M")
-      		}
+      	// 	if(correct==3){
+      	// 		console.log(row[0]);
+			    // console.log(rowstate[0]);
+      	// 		console.log(row[1]);
+			    // console.log(rowstate[1]);
+      	// 		console.log(row[2]);
+      	// 		console.log(rowstate[2]);
+      	// 		console.log("M")
+      	// 	}
 
       		}
       		 console.log(K+"-"+loop);
@@ -436,6 +463,47 @@ let probability2=[0,0.071073,
       		cost = cost/totalloop;
       		half = parseFloat(price.value) * half;
 			alert("经过一千次测试"+"\n"+"平均使用魔方"+cubecost +"\n" +"平均花费" + cost+"\n"+"最欧的人花费"+mincost+"\n"+"运气最差的人花费"+maxcost+"\n"+"中位数花费为"+half);
+      	// 基于准备好的dom，初始化echarts实例
+     
+
+
+      var myChart = echarts.init(document.getElementById('main'));
+      let XAxis = [];
+      let YAxis = [];
+      let Axis =[];
+      let num = 0;
+      for(var L=parseInt(sortloop.length-1);L>=0;L--){
+				XAxis[num] = sortloop[L].toString();
+				YAxis[num] = (num*1/totalloop).toString();
+				Axis[num] = [XAxis[num],YAxis[num]] ;
+        num++
+      }
+      // 指定图表的配置项和数据
+       var option = {
+        title: {
+          text: '消耗魔方数量统计结果，平均为'+cubecost
+        },
+        tooltip: {},
+        legend: {
+          data: ['概率']
+        },
+        xAxis: { 
+        },
+        yAxis: {},
+        series: [
+          {
+            name: '消耗魔方数量',
+            type: 'scatter',
+            data: Axis
+          }
+        ]
+      };
+
+      // 使用刚指定的配置项和数据显示图表。
+      myChart.setOption(option);
+
+
+
       	}
 
 
@@ -459,4 +527,5 @@ let probability2=[0,0.071073,
 
  </script>
 
-
+  </body>
+</html>
