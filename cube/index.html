@@ -475,7 +475,7 @@ let probability2=[0,0.071073,
       for(var L=parseInt(sortloop.length-1);L>=0;L--){
 				XAxis[num] = sortloop[L].toString();
 				YAxis[num] = (num*1/totalloop).toString();
-				Axis[num] = [XAxis[num],YAxis[num]] ;
+				Axis[num] = [YAxis[num],XAxis[num]] ;
         num++
       }
       // 指定图表的配置项和数据
@@ -488,11 +488,22 @@ let probability2=[0,0.071073,
           data: ['概率']
         },
         xAxis: { 
+          
+
         },
-        yAxis: {},
+        yAxis: {
+          splitNumber: 10,
+          splitLine: {
+            show: true,
+            lineStyle: {
+              type: 'dotted',
+              color: 'rgba(255, 255, 255,0.3)'
+            }
+          }
+        },
         series: [
           {
-            name: '达成目标概率',
+            name: '魔方数量',
             type: 'scatter',
             data: Axis
           }
