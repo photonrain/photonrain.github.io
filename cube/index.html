@@ -335,7 +335,6 @@ let probability2=[0,0.071073,
       		for(k in One){
       			if(One[k].checked){
       				target1.push(parseInt(One[k].value));
-
       			}
       		}
       		for(k in Two){
@@ -363,8 +362,7 @@ let probability2=[0,0.071073,
 					}
       				}				
 
-
-
+      		
 
       		for(var i=0;i<3;i++){//当前出现的三条
       			if(i==0){
@@ -376,24 +374,38 @@ let probability2=[0,0.071073,
       				}
 
       			}else{
-      			
       			for(var j=1;j<3;j++){//2、3条潜能池
+      				let ending = 0;//是否完全遍历潜能池，如果遍历，那么进入下一个池子
       				for(var o=0;o<target[j].length;o++){//潜能池的每个词条
       					if(rowstate[i]==target[j][o]){//正确
 						correct++;
-						break;
+						
+						ending =1;
 						}
-      				}				
+      				}	
+      				if(ending==1){
+      					break;
+      				}			
       			}
       			}
       		}
       		
+      		
 
       		correct = correct + joker;
       		loop++;
+      		if(correct==3){
+      			console.log(row[0]);
+			    console.log(rowstate[0]);
+      			console.log(row[1]);
+			    console.log(rowstate[1]);
+      			console.log(row[2]);
+      			console.log(rowstate[2]);
+      			console.log("M")
+      		}
 
       		}
-      		console.log(K);
+      		// console.log(K+"-"+loop);
       		sortloop[K]=loop;
       		cubecost = cubecost+ loop;
       		cost = cost + loop * parseFloat(price.value);
