@@ -1,6 +1,6 @@
 简易附加魔方，试用版。如果遇到BUG，请点击下方链接私信我，感谢您的支持。
 <br>
-如果点击计算后未出结果，请耐心等待。在计算前，您也可以通过F12打开控制台，查看当前计算状态(当前试验次数-该次花费魔方数量)
+如果点击计算后未出结果，请耐心等待。在计算前，您也可以通过F12打开控制台，点击Console，查看当前计算状态(当前试验次数-该次花费魔方数量)
 <br>
 <form>
 </form>
@@ -397,17 +397,17 @@ let probability2=[0,0.071073,
       		correct = correct + joker;
       		loop++;
       		if(correct==3){
-      			console.log(row[0]);
-			    console.log(rowstate[0]);
-      			console.log(row[1]);
-			    console.log(rowstate[1]);
-      			console.log(row[2]);
-      			console.log(rowstate[2]);
-      			console.log("M")
+//       			console.log(row[0]);
+// 			    console.log(rowstate[0]);
+//       			console.log(row[1]);
+// 			    console.log(rowstate[1]);
+//       			console.log(row[2]);
+//       			console.log(rowstate[2]);
+//       			console.log("M")
       		}
 
       		}
-      		// console.log(K+"-"+loop);
+      		 console.log(K+"-"+loop);
       		sortloop[K]=loop;
       		cubecost = cubecost+ loop;
       		cost = cost + loop * parseFloat(price.value);
