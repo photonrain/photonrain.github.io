@@ -394,6 +394,7 @@ let probability=[0,0.014402838,
       	let totalloop = 1000;
       	let mincost = 1000000;
       	let maxcost = 0;
+	      let sortloop =[];
       	for(var k =0;k<totalloop;k++){
       	loop=0;
       	correct = 0;
@@ -439,6 +440,7 @@ let probability=[0,0.014402838,
 
       		}
       		console.log(loop);
+		sortloop[K]=loop;
       		cubecost = cubecost+ loop;
       		cost = cost + loop * parseFloat(price.value);
       		cost = toPrecision(cost,2);
@@ -449,8 +451,19 @@ let probability=[0,0.014402838,
       			maxcost = loop * parseFloat(price.value);
       		}
       		}
+	      
       		cubecost = cubecost/totalloop;
       		cost = cost/totalloop;
+	      
+	      sortloop.sort(function (a,b) {
+      				return b-a
+    		})
+	      let half;
+      		for(var L=0;L<parseInt(sortloop.length/2);L++){
+						half = sortloop[L];
+      		}
+	      
+	      half = parseFloat(price.value) * half;
 			alert("经过一千次测试"+"\n"+"平均使用魔方"+cubecost +"\n" +"平均花费" + cost+"\n"+"最欧的人花费"+mincost+"\n"+"运气最差的人花费"+maxcost);
       	}
 
