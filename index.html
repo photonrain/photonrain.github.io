@@ -197,7 +197,6 @@
 
 
 <script src="/js/script.js"></script> -->
-
 <script>
 var _hmt = _hmt || [];
 (function() {
@@ -216,12 +215,13 @@ var _hmt = _hmt || [];
 <form>
 </form>
 <a href="https://wiki.biligame.com/maplestory/%E9%A6%96%E9%A1%B5" target="_blank" title="转到Bwiki主页">特别鸣谢Bwiki数据支持</a>
-
-
+<br>
+<input type = "radio" name = "itemtype" value="0" checked = "checked">武器</input>
+<input type = "radio" name = "itemtype" value="1">防具</input>
 <form>
     <div>
         <label>
-            武器等级：
+            装备等级：
             <input type="level" id ="level"/>
         </label>
     </div>
@@ -281,11 +281,12 @@ var _hmt = _hmt || [];
       	let starforce = document.getElementById("starforce");
       	let finalatk = document.getElementById("finalatk");
       	let times = document.getElementById("times");
-         
+        let itemtype = document.getElementsByName("itemtype");
       	
       	let scrollatk = 0;
       	let scrollatt = 0;
-
+      	let exactatk=0;
+      	let exactatt =0;
 
       	let correct = 0;
       	let loop=0;
@@ -299,16 +300,27 @@ var _hmt = _hmt || [];
 		let attcorr=0;
 		let atkcorr=0;
 
+		let totalstarforceatt= 0;
+		let totalstarforceatk =0;
+
 		let starforceatk = [[6,7,7,8,9],[7,8,8,9,10,11,12,30,31,32],[8,9,9,10,11,12,13,31,32,33],[9,9,10,11,12,13,14,32,33,34],[13,13,14,14,15,16,17,34,35,36]];
 		let starforceatt = [7,9,11,13,15];
 
+		let  starforceatkarmor = [[7,8,9,10,11],[8,9,10,11,12,13,15,17,19,21],[9,10,11,12,13,14,16,18,20,22],[10,11,12,13,14,15,17,19,21,23],[12,13,14,15,16,17,19,21,23,25]];
+		
 
 
-
-
-
+		for(var i =0; i<itemtype.length;i++){
+			if(itemtype[i].checked){
+				itemtype = i;
+				break;
+			}
+		}
+		//console.log(itemtype);
 
       	 while(correct!=2){
+      	 	totalstarforceatt=0;
+      	 	totalstarforceatk =0;
       		correct = 0;
       		 let totalscatk = toPrecision(scrollatk * parseFloat(times.value),4);
       		 let totalscatt = toPrecision(scrollatt * parseFloat(times.value),4);
@@ -319,59 +331,103 @@ var _hmt = _hmt || [];
 			let superstar = 0;
 			for (let i=0;i<parseInt(starforce.value);i++){ 
 				if(i<=14){
+					if(itemtype==0){
 					Tatk = (Math.floor(Tatk/50)+1) + Tatk;
+					totalstarforceatk = (Math.floor(Tatk/50)+1) + totalstarforceatk;
+					}
+					else{
+						Tatk = Tatk;
+					}
 				}else{
 					if(130<=parseInt(level.value)&&parseInt(level.value)<140){
-						Tatk = starforceatk[0][superstar]+ Tatk;
+						if(itemtype==0){
+							Tatk = starforceatk[0][superstar]+ Tatk;
+							totalstarforceatk = starforceatk[0][superstar] + totalstarforceatk;
+						}else{
+							Tatk = starforceatkarmor[0][superstar]+ Tatk;
+							totalstarforceatk = starforceatkarmor[0][superstar] + totalstarforceatk;
+						}
+						
 					}
 					if(140<=parseInt(level.value)&&parseInt(level.value)<150){
-						Tatk = starforceatk[1][superstar]+ Tatk;
+						if(itemtype==0){
+							Tatk = starforceatk[1][superstar]+ Tatk;
+							totalstarforceatk = starforceatk[1][superstar] + totalstarforceatk;
+						}else{
+							Tatk = starforceatkarmor[1][superstar]+ Tatk;
+							totalstarforceatk = starforceatkarmor[0][superstar] + totalstarforceatk;
+						}
 					}
 					if(150<=parseInt(level.value)&&parseInt(level.value)<160){
-						Tatk = starforceatk[2][superstar]+ Tatk;
+						if(itemtype==0){
+							Tatk = starforceatk[2][superstar]+ Tatk;
+							totalstarforceatk = starforceatk[2][superstar] + totalstarforceatk;
+						}else{
+							Tatk = starforceatkarmor[2][superstar]+ Tatk;
+							totalstarforceatk = starforceatkarmor[0][superstar] + totalstarforceatk;
+						}
 					}
 					if(parseInt(level.value)==160){
-						Tatk = starforceatk[3][superstar]+ Tatk;
+						if(itemtype==0){
+							Tatk = starforceatk[3][superstar]+ Tatk;
+							totalstarforceatk = starforceatk[3][superstar] + totalstarforceatk;
+						}else{
+							Tatk = starforceatkarmor[3][superstar]+ Tatk;
+							totalstarforceatk = starforceatkarmor[0][superstar] + totalstarforceatk;
+						}
 					}
 					if(parseInt(level.value)==200){
-						Tatk = starforceatk[4][superstar]+ Tatk;
+						if(itemtype==0){
+							Tatk = starforceatk[4][superstar]+ Tatk;
+							totalstarforceatk = starforceatk[4][superstar] + totalstarforceatk;
+						}else{
+							Tatk = starforceatkarmor[4][superstar]+ Tatk;
+							totalstarforceatk = starforceatkarmor[0][superstar] + totalstarforceatk;
+						}
 					}
 					
 				}
 			if(i<=4){
+				totalstarforceatt = totalstarforceatt+2;
 				Tatt = 2 + Tatt;
 			}
 			if(4<i && i<=14){
 				Tatt = 3 + Tatt;
+				totalstarforceatt = totalstarforceatt+3
 			}
 			if(i>14){
 				if(130<=parseInt(level.value)&&parseInt(level.value)<140){
 					Tatt = starforceatt[0] + Tatt;
+					totalstarforceatt = totalstarforceatt+starforceatt[0]
 					superstar++
 				}
 				if(140<=parseInt(level.value)&&parseInt(level.value)<150){
 					Tatt = starforceatt[1] + Tatt;
+					totalstarforceatt= totalstarforceatt+starforceatt[1]
 					superstar++
 				}
 				if(150<=parseInt(level.value)&&parseInt(level.value)<160){
 					Tatt = starforceatt[2] + Tatt;
+					totalstarforceatt = totalstarforceatt+starforceatt[2]
 					superstar++
 					// console.log("superstar");
 					// console.log(parseInt(starforceatt[superstar]));
 				}
 				if(160==parseInt(level.value)){
 					Tatt = starforceatt[3] + Tatt;
+					totalstarforceatt= totalstarforceatt+starforceatt[3]
 					superstar++
 				}
 				if(200==parseInt(level.value)){
 					Tatt = starforceatt[4] + Tatt;
+					totalstarforceatt=totalstarforceatt+starforceatt[4]
 					superstar++
 				}
 				
 			}
 			}
 			 //记录一下，主要是PB卷太麻烦了
-			 
+			 //console.log(totalstarforceatt);
 			 Datk[loop] = Math.abs(Tatk-parseInt(finalatk.value));
 			 Datt[loop] = Math.abs(Tatt-parseInt(finalatt.value));
 			 
@@ -411,11 +467,12 @@ var _hmt = _hmt || [];
 	      		}
 	      		
 			}else{
+
 				scrollatk = toPrecision(scrollatk,2) + 0.01;
 				scrollatt = toPrecision(scrollatt,2) + 0.01;
+				
 			}
 			// console.log(6)
-			
 			// console.log(Datt[loop])
 			// console.log(scrollatk)
 			// console.log(scrollatt)
@@ -432,10 +489,14 @@ var _hmt = _hmt || [];
 		}
       	}
 
-      	let outatk = toPrecision(scrollatk,2);
-      	let outatt = toPrecision(scrollatt,2);
+      	let outatk = toPrecision(scrollatk,3);
+      	let outatt = toPrecision(scrollatt,3);
 
-      	alert("卷轴攻击力"+outatk +"\n" +"卷轴属性" + outatt);
+      	let scatk = (finalatk.value - baseatk.value)-totalstarforceatk;
+
+      	let scatt = (finalatt.value - baseatt.value)-totalstarforceatt;
+      	
+      	alert("卷轴平均攻击力"+outatk +"\n" +"卷轴平均属性" + outatt+"\n" + "砸卷增加攻击力总共为"+scatk +"\n"+"砸卷增加属性总共为"+scatt);
         
       }
  </script>
@@ -452,6 +513,11 @@ var _hmt = _hmt || [];
     }
 
  </script>
+
+
+
+
+
 
 
 
