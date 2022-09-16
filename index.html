@@ -195,8 +195,6 @@
 
 
 
-
-<script src="/js/script.js"></script> -->
 <script>
 var _hmt = _hmt || [];
 (function() {
@@ -355,7 +353,7 @@ var _hmt = _hmt || [];
 							totalstarforceatk = starforceatk[1][superstar] + totalstarforceatk;
 						}else{
 							Tatk = starforceatkarmor[1][superstar]+ Tatk;
-							totalstarforceatk = starforceatkarmor[0][superstar] + totalstarforceatk;
+							totalstarforceatk = starforceatkarmor[1][superstar] + totalstarforceatk;
 						}
 					}
 					if(150<=parseInt(level.value)&&parseInt(level.value)<160){
@@ -364,7 +362,7 @@ var _hmt = _hmt || [];
 							totalstarforceatk = starforceatk[2][superstar] + totalstarforceatk;
 						}else{
 							Tatk = starforceatkarmor[2][superstar]+ Tatk;
-							totalstarforceatk = starforceatkarmor[0][superstar] + totalstarforceatk;
+							totalstarforceatk = starforceatkarmor[2][superstar] + totalstarforceatk;
 						}
 					}
 					if(parseInt(level.value)==160){
@@ -373,7 +371,7 @@ var _hmt = _hmt || [];
 							totalstarforceatk = starforceatk[3][superstar] + totalstarforceatk;
 						}else{
 							Tatk = starforceatkarmor[3][superstar]+ Tatk;
-							totalstarforceatk = starforceatkarmor[0][superstar] + totalstarforceatk;
+							totalstarforceatk = starforceatkarmor[3][superstar] + totalstarforceatk;
 						}
 					}
 					if(parseInt(level.value)==200){
@@ -382,7 +380,7 @@ var _hmt = _hmt || [];
 							totalstarforceatk = starforceatk[4][superstar] + totalstarforceatk;
 						}else{
 							Tatk = starforceatkarmor[4][superstar]+ Tatk;
-							totalstarforceatk = starforceatkarmor[0][superstar] + totalstarforceatk;
+							totalstarforceatk = starforceatkarmor[4][superstar] + totalstarforceatk;
 						}
 					}
 					
@@ -495,7 +493,8 @@ var _hmt = _hmt || [];
       	let scatk = (finalatk.value - baseatk.value)-totalstarforceatk;
 
       	let scatt = (finalatt.value - baseatt.value)-totalstarforceatt;
-      	
+      	console.log(finalatk.value - baseatk.value);
+      	console.log(totalstarforceatk);
       	alert("卷轴平均攻击力"+outatk +"\n" +"卷轴平均属性" + outatt+"\n" + "砸卷增加攻击力总共为"+scatk +"\n"+"砸卷增加属性总共为"+scatt);
         
       }
@@ -513,6 +512,11 @@ var _hmt = _hmt || [];
     }
 
  </script>
+
+
+
+
+
 
 
 
