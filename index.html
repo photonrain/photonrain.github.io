@@ -1,4 +1,6 @@
-<script>
+
+<!-- saved from url=(0029)https://photonrain.github.io/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script src="./photonrain.github.io_files/hm.js.下载"></script><script>
 var _hmt = _hmt || [];
 (function() {
   var hm = document.createElement("script");
@@ -7,71 +9,95 @@ var _hmt = _hmt || [];
   s.parentNode.insertBefore(hm, s);
 })();
 </script>
-
-
-简易武器卷轴逆推，试用版。如果遇到BUG，请点击下方链接私信我，感谢您的支持。
+<script src="jquery-3.4.1.slim.js"></script>
+<script src="popper.js"></script>
+<script src="bootstrap.js"></script>
+<script src="updateOptions.js"></script>
+<link rel="stylesheet" href="bootstrap.css">
+<link rel="stylesheet" href="font-awesome.css">
+<link rel="stylesheet" href="style.css">
+</head><body>
+	<div class="container-fluid head">
+        <h1><span>简易武器卷轴逆推<br/></span> </h1>
+    <!-- <h1><span>class="container-fluid head"</span> </h1> -->
+    </div>
 <form>
 </form>
-<a href="https://space.bilibili.com/44579584?spm_id_from=333.1007.0.0" target="_blank" title="转到B站主页">by紫电NS</a>
-<form>
-</form>
-<a href="https://wiki.biligame.com/maplestory/%E9%A6%96%E9%A1%B5" target="_blank" title="转到Bwiki主页">特别鸣谢Bwiki数据支持</a>
+
+<style>textarea{resize: none;}</style>>
+
+<!-- 只读模式 -->
+<form class="container maincon">
+
+	<input type="radio" name="itemtype" value="0" checked="checked">武器
+<input type="radio" name="itemtype" value="1">防具(非手套)
+<input type="radio" name="itemtype" value="2">手套
 <br>
-<input type = "radio" name = "itemtype" value="0" checked = "checked">武器</input>
-<input type = "radio" name = "itemtype" value="1">防具(非手套)</input>
-<input type = "radio" name = "itemtype" value="2">手套</input>
-<form>
+<p>输入后按tab以切换至下一输入框</p>
+	<div class='form-row' id="statequivalences">
     <div>
         <label>
             装备等级：
-            <input type="level" id ="level"/>
+            <input type="level" class="form-control text-align-left" id="level" onkeypress="if(event.keyCode==13) focusNextInput(this);">
         </label>
     </div>
+
     <div>
         <label>
             基础攻击力：
-            <input type="baseatk" id="baseatk"/>
+            <input type="baseatk" class="form-control text-align-left" id="baseatk" onkeypress="if(event.keyCode==13) focusNextInput(this);">
         </label>
     </div>
     <div>
         <label>
             基础主属性：
-            <input type="baseatt" id="baseatt"/>
+            <input type="baseatt" class="form-control text-align-left" id="baseatt" onkeypress="if(event.keyCode==13) focusNextInput(this);">
         </label>
     </div>
     <div>
         <label>
             星之力等级：
-            <input type="starforce" id="starforce"/>
+            <input type="starforce" class="form-control text-align-left" id="starforce" onkeypress="if(event.keyCode==13) focusNextInput(this);">
         </label>
     </div>
     <div>
         <label>
             最终攻击力（不含火花）：
-            <input type="finalatk" id="finalatk"/>
+            <input type="finalatk" class="form-control text-align-left" id="finalatk" onkeypress="if(event.keyCode==13) focusNextInput(this);">
         </label>
     </div>
     <div>
         <label>
             最终主属性（不含火花）：
-            <input type="finalatt" id="finalatt"/>
+            <input type="finalatt" class="form-control text-align-left"  id="finalatt" onkeypress="if(event.keyCode==13) focusNextInput(this);" autocomplete="off">
         </label>
     </div>
     <div>
         <label>
             已用升级次数：
-            <input type="times" id="times"/>
+            <input type="times" class="form-control text-align-left" id="times">
         </label>
     </div>
-
+</div>
 
 
 <button type="button" onclick="contxt()">计算</button>
 <br>	
-<a class="main-nav-link" href="/archives">另外，怪怪方块计算器测试版，欢迎测试哟~</a>
 <br>
-<a class="main-nav-link" href="/cube">另外，纹章附加计算器测试版，欢迎测试哟~</a>
-<form>
+
+<textarea id="txt1" rows="4" readonly=”readonly” cols="50" > </textarea>
+
+<br>
+<a class="main-nav-link" href="https://photonrain.github.io/archives">怪怪方块计算器</a>
+<br>
+<a class="main-nav-link" href="https://photonrain.github.io/cube">纹章附加潜能计算器</a>
+
+<br>
+<br>
+<a href="https://space.bilibili.com/44579584?spm_id_from=333.1007.0.0" target="_blank" title="转到B站主页">BUG请联系：紫电NS</a>
+<br>
+<a href="https://wiki.biligame.com/maplestory/%E9%A6%96%E9%A1%B5" target="_blank" title="转到Bwiki主页">特别鸣谢Bwiki数据支持</a>
+<br>
 </form>
 <script type="text/javascript">
 
@@ -330,7 +356,8 @@ var _hmt = _hmt || [];
       	let scatt = (finalatt.value - baseatt.value)-totalstarforceatt;
       	console.log(finalatk.value - baseatk.value);
       	console.log(totalstarforceatk);
-      	alert("卷轴平均攻击力"+outatk +"\n" +"卷轴平均属性" + outatt+"\n" + "砸卷增加攻击力总共为"+scatk +"\n"+"砸卷增加属性总共为"+scatt);
+      	// alert("卷轴平均攻击力"+outatk +"\n" +"卷轴平均属性" + outatt+"\n" + "砸卷增加攻击力总共为"+scatk +"\n"+"砸卷增加属性总共为"+scatt);
+      	txt1.value="卷轴平均攻击力"+outatk +"\n" +"卷轴平均属性" + outatt+"\n" + "砸卷增加攻击力总共为"+scatk +"\n"+"砸卷增加属性总共为"+scatt;
         
       }
  </script>
@@ -351,3 +378,4 @@ var _hmt = _hmt || [];
 
 
 
+</body></html>
