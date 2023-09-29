@@ -3016,12 +3016,7 @@ for(var j = 0; j <maxtier; j++){
           }
 
           console.log(score);
-        })
-        .catch(error => {
-          console.log('读取文件出错：', error);
-        });
-    }
-    console.log(score.length)
+          console.log(score.length)
     for (var i = score.length - 1; i >= 0; i--) {
         console.log('try')
         if(score[i]<=Score_input&&score[i+1]>=Score_input){
@@ -3031,6 +3026,12 @@ for(var j = 0; j <maxtier; j++){
         }
 
     }
+        })
+        .catch(error => {
+          console.log('读取文件出错：', error);
+        });
+    }
+    
 
     }
       
