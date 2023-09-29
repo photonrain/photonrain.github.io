@@ -52,6 +52,7 @@ var _hmt = _hmt || [];
 <input type="checkbox" name="isboss" value="1" id="isboss">是否为BOSS装备
 <br>
 
+
 <script>
 function toggleLabel() {
   var type = document.getElementsByName("itemtype");
@@ -68,6 +69,8 @@ function toggleLabel() {
     console.log(type[0].checked)
 }
 </script>
+
+
 
     <!-- <div>
         <label>
@@ -186,6 +189,13 @@ function toggleLabel() {
 </div>
 
 <div class="form-row" id="armorstate">
+    主属性是哪个
+  <select id="attributes">
+  <option value="STR">力量</option>
+  <option value="DEX">敏捷</option>
+  <option value="INT">智力</option>
+  <option value="LUK">运气</option>
+</select>
     <div>
         <label>
             装备等级：
@@ -293,12 +303,14 @@ function toggleLabel() {
 <a href="https://wiki.biligame.com/maplestory/%E8%A3%85%E5%A4%87%E5%BC%BA%E5%8C%96" target="_blank" title="转到Bwiki主页">
 
 
+  
 <script>
+  var Score_input =0;
+  var score=[];
+  
      function  contxt() //定义函数
       { var maxtier = 5;
         var output = "" ; 
-        var score =0 ;
-        var value =0 ;
         var totalvalue = new Array() ;
         var Llevel = document.getElementById("LEVEL");
         var STR = document.getElementById("STR");
@@ -355,7 +367,22 @@ function toggleLabel() {
         Lleve = parseFloat(Llevel.value)+parseFloat(Llevel1.value);
         BASEATT = parseFloat(BASEATT.value);
         
-          
+        mainstate = document.getElementById("attributes");
+        if(mainstate.value=='STR'){
+            Score_input = Score_input+STR+ATT*5+ALLSTATE*9;
+        }
+        if(mainstate.value=='DEX'){
+            Score_input = Score_input+DEX+ATT*5+ALLSTATE*9;
+        }
+        if(mainstate.value=='INT'){
+            Score_input = Score_input+INT+MT*5+ALLSTATE*9;
+        }
+        if(mainstate.value=='LUK'){
+            Score_input = Score_input+LUK+ATT*5+ALLSTATE*9;
+        }
+        
+       console.log(Score_input)
+        
 
         var onestate = new Array();//主属性
         for(var i =0; i<12;i++){//装备等级区间
@@ -2960,13 +2987,12 @@ for(var j = 0; j <maxtier; j++){
                         }
     }
                         
-
-
-</script>
-
-<script>
-    function readExcelFile() {
-      var Llevel = document.getElementById("LEVEL");
+ function readExcelFile() {
+    var type = document.getElementsByName("itemtype");
+  if(type[0].checked == true){
+       
+    }else{
+        var Llevel = document.getElementById("LEVEL");
       var Llevel1 = document.getElementById("LEVEL1");
       
       Lleve = parseFloat(Llevel.value)+parseFloat(Llevel1.value);
@@ -2982,7 +3008,7 @@ for(var j = 0; j <maxtier; j++){
           var worksheet = workbook.Sheets[workbook.SheetNames[0]];
           var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-          var score = [];
+          
           var row = jsonData[0]; // Assumes only one row in the Excel sheet
 
           for (var i = 0; i < row.length; i++) {
@@ -2995,7 +3021,19 @@ for(var j = 0; j <maxtier; j++){
           console.log('读取文件出错：', error);
         });
     }
-  </script>
+    for(var i=0;i<score.length;i++){
+        if(score[i]==Score_input){
+            txt1.value= txt1.value+"\n"+'这个火花已经超过了'+i/100+'%的火花';
+            break;
+        }
+
+    }
+
+    }
+      
+</script>
+
+
 
 
   
