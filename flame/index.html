@@ -9,6 +9,7 @@ var _hmt = _hmt || [];
   s.parentNode.insertBefore(hm, s);
 })();
 </script>
+   <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
 <script src="./photonrain.github.io_files/jquery-3.4.1.slim.js.下载"></script>
 <script src="./photonrain.github.io_files/popper.js.下载"></script>
 <script src="./photonrain.github.io_files/bootstrap.js.下载"></script>
@@ -274,7 +275,8 @@ function toggleLabel() {
 
 
 
-<button type="button" onclick="contxt()">计算</button>
+<button type="button" onclick="contxt(); readExcelFile();">计算</button>
+  
 <br>    
 <br>
 
@@ -2962,4 +2964,39 @@ for(var j = 0; j <maxtier; j++){
 
 </script>
 
+<script>
+    function readExcelFile() {
+      var Llevel = document.getElementById("LEVEL");
+      var Llevel1 = document.getElementById("LEVEL1");
+      
+      Lleve = parseFloat(Llevel.value)+parseFloat(Llevel1.value);
+      var input = document.getElementById('input-score');
+      var filename = Lleve + '.xlsx';
+
+      fetch(filename)
+        .then(response => response.arrayBuffer())
+        .then(buffer => {
+          var data = new Uint8Array(buffer);
+          var workbook = XLSX.read(data, { type: 'array' });
+
+          var worksheet = workbook.Sheets[workbook.SheetNames[0]];
+          var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+          var score = [];
+          var row = jsonData[0]; // Assumes only one row in the Excel sheet
+
+          for (var i = 0; i < row.length; i++) {
+            score.push(row[i]);
+          }
+
+          console.log(score);
+        })
+        .catch(error => {
+          console.log('读取文件出错：', error);
+        });
+    }
+  </script>
+
+
+  
 </h1></form></body></html>
