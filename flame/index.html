@@ -3021,8 +3021,8 @@ for(var j = 0; j <maxtier; j++){
           console.log('读取文件出错：', error);
         });
     }
-    console.log(Score_input)
-    for(var i=0;i<score.length;i++){
+    console.log(score.length)
+    for (var i = score.length - 1; i >= 0; i--) {
         console.log('try')
         if(score[i]<=Score_input&&score[i+1]>=Score_input){
             console.log('find it')
