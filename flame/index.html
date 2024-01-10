@@ -3059,6 +3059,11 @@ for(var j = 0; j <maxtier; j++){
             txt1.value= txt1.value+"\n"+'这个火花已经超过了'+i/100+'%的火花';
             break;
         }
+        if(score[score.length-1]<=Score_input){
+            console.log('find it')
+            txt1.value= txt1.value+"\n"+'这个火花已经超过了100%的火花，无敌了';
+            break;
+        }
 
     }
         })
