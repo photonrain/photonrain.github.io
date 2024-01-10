@@ -1,6 +1,6 @@
 
-<!-- saved from url=(0029)https://photonrain.github.io/ -->
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script src="./photonrain.github.io_files/hm.js.下载"></script><script src="./photonrain.github.io_files/hm.js(1).下载"></script><script>
+<!-- saved from url=(0035)https://photonrain.github.io/flame/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script src="./photonrain.github.io_files/hm.js.下载"></script><script src="./photonrain.github.io_files/hm(1).js.下载"></script><script src="./photonrain.github.io_files/hm.js(1).下载"></script><script>
 var _hmt = _hmt || [];
 (function() {
   var hm = document.createElement("script");
@@ -9,7 +9,7 @@ var _hmt = _hmt || [];
   s.parentNode.insertBefore(hm, s);
 })();
 </script>
-   <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+   <script src="./photonrain.github.io_files/xlsx.full.min.js.下载"></script>
 <script src="./photonrain.github.io_files/jquery-3.4.1.slim.js.下载"></script>
 <script src="./photonrain.github.io_files/popper.js.下载"></script>
 <script src="./photonrain.github.io_files/bootstrap.js.下载"></script>
@@ -21,15 +21,15 @@ var _hmt = _hmt || [];
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
 
 
-</head><body onload = "toggleLabel()">
+</head><body onload="toggleLabel()">
     <div class="container-fluid head">
         <h1><span>简易火花等级计算器<br></span> </h1>
     <!-- <h1><span>class="container-fluid head"</span> </h1> -->
     </div>
-  <a href="https://photonrain.github.io/"  title="回到主页">首页</a>
+  <a href="https://photonrain.github.io/" title="回到主页">首页</a>
 <form>
 </form>
-输入火花属性即可计算<a href="https://www.bilibili.com/video/BV17N4y1Z71E/"  title="教学">教学视频</a>
+输入火花属性即可计算<a href="https://www.bilibili.com/video/BV17N4y1Z71E/" title="教学">教学视频</a>
   <br>
 如果火花均为属性(4条)，需等待20秒。如果遇到BUG，请点击下方链接私信我，感谢您的支持。
   <br>   
@@ -52,9 +52,9 @@ var _hmt = _hmt || [];
 <!-- 只读模式 -->
 <form class="container maincon">
 
-<input type="radio" name="itemtype" id="itemtype" value="0" checked="checked", onclick="toggleLabel()">武器
-<input type="radio" name="itemtype" value="1", onclick="toggleLabel()">防具/饰品
-<input type="checkbox" name="isboss" value="1" id="isboss">是否为BOSS装备
+<input type="radio" name="itemtype" id="itemtype" value="0" checked="checked" ,="" onclick="toggleLabel()">武器
+<input type="radio" name="itemtype" value="1" ,="" onclick="toggleLabel()">防具/饰品
+<input type="checkbox" name="isboss" value="1" id="isboss" onclick="flamenum()" checked="checked">是否为BOSS装备
 <br>
 
 
@@ -69,6 +69,20 @@ function toggleLabel() {
     }else{
         weapon.style.display = "none";
         armo.style.display = "block";
+
+    }
+    console.log(type[0].checked)
+}
+</script>
+
+<script>
+function flamenum() {
+  var type = document.getElementsByName("isboss");
+  var weapon = document.getElementById("flamenum");
+  if(type[0].checked == false){
+        weapon.style.display = "block";
+    }else{
+        weapon.style.display = "none";
 
     }
     console.log(type[0].checked)
@@ -96,8 +110,19 @@ function toggleLabel() {
         </label>
     </div> -->
 
+      
+
 <p>输入后按tab以切换至下一输入框</p>
-    <div class="form-row" id="weaponstate">
+
+  <div id="flamenum" style="display: none;">
+        <label>
+            猜测火花条数：
+            <input type="FNUM" class="form-control text-align-left" id="FNUM" onkeypress="if(event.keyCode==13) focusNextInput(this) ;" value="0">
+        </label>
+</div>
+
+
+    <div class="form-row" id="weaponstate" style="display: none;">
         <div>
         <label>
             装备等级：
@@ -122,78 +147,78 @@ function toggleLabel() {
     <div>
         <label>
             敏捷：
-            <input type="DEX" class="form-control text-align-left" id="DEX1" onkeypress="if(event.keyCode==13) focusNextInput(this);"value="0">
+            <input type="DEX" class="form-control text-align-left" id="DEX1" onkeypress="if(event.keyCode==13) focusNextInput(this);" value="0">
         </label>
     </div>
     <div>
         <label>
             智力：
-            <input type="INT" class="form-control text-align-left" id="INT1" onkeypress="if(event.keyCode==13) focusNextInput(this);"value="0">
+            <input type="INT" class="form-control text-align-left" id="INT1" onkeypress="if(event.keyCode==13) focusNextInput(this);" value="0">
         </label>
     </div>
     <div>
         <label>
             运气：
-            <input type="LUK" class="form-control text-align-left" id="LUK1" onkeypress="if(event.keyCode==13) focusNextInput(this);"value="0">
+            <input type="LUK" class="form-control text-align-left" id="LUK1" onkeypress="if(event.keyCode==13) focusNextInput(this);" value="0">
         </label>
     </div>
     <div>
         <label>
             最大血量：
-            <input type="HP" class="form-control text-align-left" id="HP1" onkeypress="if(event.keyCode==13) focusNextInput(this);"value="0">
+            <input type="HP" class="form-control text-align-left" id="HP1" onkeypress="if(event.keyCode==13) focusNextInput(this);" value="0">
         </label>
     </div>
     <div>
         <label>
             最大蓝量：
-            <input type="MP" class="form-control text-align-left" id="MP1" onkeypress="if(event.keyCode==13) focusNextInput(this);"value="0">
+            <input type="MP" class="form-control text-align-left" id="MP1" onkeypress="if(event.keyCode==13) focusNextInput(this);" value="0">
         </label>
     </div>
     <div>
         <label>
             装备需求等级降低：
-            <input type="LEVEL" class="form-control text-align-left" id="LEVELDEC1"value="0">
+            <input type="LEVEL" class="form-control text-align-left" id="LEVELDEC1" value="0">
         </label>
     </div>
     <div>
         <label>
             防御力：
-            <input type="DEF" class="form-control text-align-left" id="DEF1"value="0">
+            <input type="DEF" class="form-control text-align-left" id="DEF1" value="0">
         </label>
     </div>
     <div>
         <label>
             攻击力：
-            <input type="ATT" class="form-control text-align-left" id="ATT1"value="0">
+            <input type="ATT" class="form-control text-align-left" id="ATT1" value="0">
         </label>
     </div>
     <div>
         <label>
             魔法攻击力：
-            <input type="MT" class="form-control text-align-left" id="MT1"value="0">
+            <input type="MT" class="form-control text-align-left" id="MT1" value="0">
         </label>
     </div>
     <div>
         <label>
             BOSS伤害：
-            <input type="BD" class="form-control text-align-left" id="BD"value="0">
+            <input type="BD" class="form-control text-align-left" id="BD" value="0">
         </label>
     </div>
     <div>
         <label>
             伤害：
-            <input type="DAM" class="form-control text-align-left" id="DAM"value="0">
+            <input type="DAM" class="form-control text-align-left" id="DAM" value="0">
         </label>
     </div>
     <div>
         <label>
             全属性：
-            <input type="AS" class="form-control text-align-left" id="AS1"value="0">
+            <input type="AS" class="form-control text-align-left" id="AS1" value="0">
         </label>
     </div>
 </div>
 
-<div class="form-row" id="armorstate">
+<div class="form-row" id="armorstate" style="display: block;">
     主属性是哪个
   <select id="attributes">
   <option value="STR">力量</option>
@@ -210,80 +235,80 @@ function toggleLabel() {
     <div>
         <label>
             力量：
-            <input type="STR" class="form-control text-align-left" id="STR" onkeypress="if(event.keyCode==13) focusNextInput(this);"value="0">
+            <input type="STR" class="form-control text-align-left" id="STR" onkeypress="if(event.keyCode==13) focusNextInput(this);" value="0">
         </label>
     </div>
 
     <div>
         <label>
             敏捷：
-            <input type="DEX" class="form-control text-align-left" id="DEX" onkeypress="if(event.keyCode==13) focusNextInput(this);"value="0">
+            <input type="DEX" class="form-control text-align-left" id="DEX" onkeypress="if(event.keyCode==13) focusNextInput(this);" value="0">
         </label>
     </div>
     <div>
         <label>
             智力：
-            <input type="INT" class="form-control text-align-left" id="INT" onkeypress="if(event.keyCode==13) focusNextInput(this);"value="0">
+            <input type="INT" class="form-control text-align-left" id="INT" onkeypress="if(event.keyCode==13) focusNextInput(this);" value="0">
         </label>
     </div>
     <div>
         <label>
             运气：
-            <input type="LUK" class="form-control text-align-left" id="LUK" onkeypress="if(event.keyCode==13) focusNextInput(this);"value="0">
+            <input type="LUK" class="form-control text-align-left" id="LUK" onkeypress="if(event.keyCode==13) focusNextInput(this);" value="0">
         </label>
     </div>
     <div>
         <label>
             最大血量：
-            <input type="HP" class="form-control text-align-left" id="HP" onkeypress="if(event.keyCode==13) focusNextInput(this);"value="0">
+            <input type="HP" class="form-control text-align-left" id="HP" onkeypress="if(event.keyCode==13) focusNextInput(this);" value="0">
         </label>
     </div>
     <div>
         <label>
             最大蓝量：
-            <input type="MP" class="form-control text-align-left" id="MP" onkeypress="if(event.keyCode==13) focusNextInput(this);"value="0">
+            <input type="MP" class="form-control text-align-left" id="MP" onkeypress="if(event.keyCode==13) focusNextInput(this);" value="0">
         </label>
     </div>
     <div>
         <label>
             装备需求等级降低：
-            <input type="LEVEL" class="form-control text-align-left" id="LEVELDEC"value="0">
+            <input type="LEVEL" class="form-control text-align-left" id="LEVELDEC" value="0">
         </label>
     </div>
     <div>
         <label>
             防御力：
-            <input type="DEF" class="form-control text-align-left" id="DEF"value="0">
+            <input type="DEF" class="form-control text-align-left" id="DEF" value="0">
         </label>
     </div>
     <div>
         <label>
             攻击力：
-            <input type="ATT" class="form-control text-align-left" id="ATT"value="0">
+            <input type="ATT" class="form-control text-align-left" id="ATT" value="0">
         </label>
     </div>
     <div>
         <label>
             魔法攻击力：
-            <input type="MT" class="form-control text-align-left" id="MT"value="0">
+            <input type="MT" class="form-control text-align-left" id="MT" value="0">
         </label>
     </div>
     <div>
         <label>
             全属性：
-            <input type="AS" class="form-control text-align-left" id="AS"value="0">
+            <input type="AS" class="form-control text-align-left" id="AS" value="0">
         </label>
     </div>
     <div>
         <label>
             移动速度：
-            <input type="MOVE" class="form-control text-align-left" id="MOVE"value="0">
+            <input type="MOVE" class="form-control text-align-left" id="MOVE" value="0">
         </label>
     </div>
     <div>
         <label>
             跳跃力：
-            <input type="JUMP" class="form-control text-align-left" id="JUMP"value="0">
+            <input type="JUMP" class="form-control text-align-left" id="JUMP" value="0">
         </label>
     </div>
 </div>
@@ -736,6 +761,7 @@ function toggleLabel() {
                     }
                     
                 }
+
                 var remainder = 4-term;
 
                 if(remainder==-1){//没有属性
@@ -1310,7 +1336,9 @@ function toggleLabel() {
                     }
                     
                 }
-                var remainder = 4-term;
+                var MAXFLAME = document.getElementById("FNUM");
+                maxflame = parseFloat(MAXFLAME.value);
+                var remainder = maxflame-term;
 
                 if(remainder==-1){//没有属性
 
@@ -2456,7 +2484,9 @@ for(var j = 0; j <maxtier; j++){
                     }
                     
                 }
-                var remainder = 4-term;
+                var MAXFLAME = document.getElementById("FNUM");
+                maxflame = parseFloat(MAXFLAME.value);
+                var remainder = maxflame-term;
 
                 if(remainder==-1){//没有属性
 
@@ -3046,4 +3076,5 @@ for(var j = 0; j <maxtier; j++){
 
 
   
-</h1></form></body></html>
+
+</a></form></body></html>
