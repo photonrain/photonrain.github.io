@@ -31,9 +31,10 @@ var _hmt = _hmt || [];
 </form>
 输入火花属性即可计算<a href="https://www.bilibili.com/video/BV17N4y1Z71E/" title="教学">教学视频</a>
   <br>
-如果火花均为属性(4条)，需等待20秒。如果遇到BUG，请点击下方链接私信我，感谢您的支持。
+如果遇到计算问题可以刷新(F5)，无法解决的话，请点击下方链接私信我，感谢您的支持。
   <br>   
-火花评分系统暂时仅适用于140，150，160，200等级的BOSS防具饰品
+火花评分系统暂时仅适用于140，150，160，200, 250等级的BOSS防具饰品
+
 <style>textarea{resize: none;}</style>&gt;
 
 
@@ -55,6 +56,7 @@ var _hmt = _hmt || [];
 <input type="radio" name="itemtype" id="itemtype" value="0" checked="checked" ,="" onclick="toggleLabel()">武器
 <input type="radio" name="itemtype" value="1" ,="" onclick="toggleLabel()">防具/饰品
 <input type="checkbox" name="isboss" value="1" id="isboss" onclick="flamenum()" checked="checked">是否为BOSS装备
+<input type="checkbox" name="ishighflame" value="1" id="ishighflame" onclick="flamenum()" >是否为高级火花（4-7级评分，仅适用于防具）
 <br>
 
 
@@ -593,8 +595,12 @@ function flamenum() {
 
         var equiptype = document.getElementById("itemtype");//如果为真，则表明现在是武器
         var isboss = document.getElementById("isboss");//如果为真，则表明现在是boss装备
+        var ishighflame = document.getElementById("ishighflame");//如果为真，则表明现在是高等级评分
         equiptype = equiptype.checked;
         isboss  = isboss.checked;
+        ishighflame = ishighflame.checked;
+        console.log('pre')
+        console.log(ishighflame)
                         var correct = 0;//判断属性计算是否正确
         if(equiptype == true){
             if(isboss == true){//BOSS武器
@@ -3032,7 +3038,15 @@ for(var j = 0; j <maxtier; j++){
       
       Lleve = parseFloat(Llevel.value)+parseFloat(Llevel1.value);
       var input = document.getElementById('input-score');
-      var filename = Lleve + '.xlsx';
+      var ishighflame = document.getElementById("ishighflame");//如果为真，则表明现在是高等级评分
+      ishighflame = ishighflame.checked;
+      if(ishighflame ==true){//判断是否是高级火花评分
+        var filename = Lleve + 'high.xlsx';
+
+      }else{
+        var filename = Lleve + '.xlsx';
+      }
+      
 
       fetch(filename)
         .then(response => response.arrayBuffer())
@@ -3050,8 +3064,8 @@ for(var j = 0; j <maxtier; j++){
             score.push(row[i]);
           }
 
-          console.log(score);
-          console.log(score.length)
+         // console.log(score);
+         // console.log(score.length)
     for (var i = score.length - 1; i >= 0; i--) {
         console.log('try')
         if(score[i]<=Score_input&&score[i+1]>=Score_input){
