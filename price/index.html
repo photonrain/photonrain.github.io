@@ -19,15 +19,15 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"photonrain.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="当前数据日期2025.1.152.12周报视频金价物价图线压缩包 充电-为周报注入更多动力！">
+    <meta name="description" content="当前数据日期2025.1.152.12周报视频金价物价图线压缩包 充电-为周报注入更多动力！ MA5:当日往前5天的平均价 MA10：当日往前10天的平均价 商品价格仅供参考，部分漆黑道具价格有误（未区分成品与白板）       &#x2F;&#x2F; 中文单位格式化 function formatChineseUnit(value) {     if (value &gt;&#x3D; 1e8) return (value&#x2F;1e">
 <meta property="og:type" content="website">
 <meta property="og:title" content="路西德部分商品价格（周更）">
 <meta property="og:url" content="https://photonrain.github.io/price/index.html">
 <meta property="og:site_name" content="随笔">
-<meta property="og:description" content="当前数据日期2025.1.152.12周报视频金价物价图线压缩包 充电-为周报注入更多动力！">
+<meta property="og:description" content="当前数据日期2025.1.152.12周报视频金价物价图线压缩包 充电-为周报注入更多动力！ MA5:当日往前5天的平均价 MA10：当日往前10天的平均价 商品价格仅供参考，部分漆黑道具价格有误（未区分成品与白板）       &#x2F;&#x2F; 中文单位格式化 function formatChineseUnit(value) {     if (value &gt;&#x3D; 1e8) return (value&#x2F;1e">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2025-02-12T03:59:46.793Z">
-<meta property="article:modified_time" content="2025-02-12T03:59:46.793Z">
+<meta property="article:published_time" content="2025-02-13T09:27:27.097Z">
+<meta property="article:modified_time" content="2025-02-13T09:27:27.097Z">
 <meta property="article:author" content="紫电NS">
 <meta name="twitter:card" content="summary">
 
@@ -206,19 +206,275 @@
       <div class="post-body">
           <h2 id="当前数据日期2025-1-15"><a href="#当前数据日期2025-1-15" class="headerlink" title="当前数据日期2025.1.15"></a>当前数据日期2025.1.15</h2><p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV13m41127Ti/">2.12周报视频</a><br><a href="./gold.png">金价</a><br><a href="./price.zip">物价图线压缩包</a></p>
 <div class="text-center"><a class="btn" href="./donate.jpg" title="充电"><i class="fa fa-battery-full"></i>充电-为周报注入更多动力！</a></div>
+MA5:当日往前5天的平均价
+MA10：当日往前10天的平均价
+商品价格仅供参考，部分漆黑道具价格有误（未区分成品与白板）
+<div id="chartsContainer"></div>
 
 
 
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<script>
+// 中文单位格式化
+function formatChineseUnit(value) {
+    if (value >= 1e8) return (value/1e8).toFixed(1) + '亿';
+    if (value >= 1e4) return (value/1e4).toFixed(0) + '万';
+    return value;
+}
+
+// CSV处理函数
+function processCSV(csv) {
+    return csv.split(/\r?\n/)
+        .filter(row => {
+            const trimmed = row.trim();
+            return trimmed.length > 0 && !trimmed.startsWith('Date'); // 跳过英文表头
+        })
+        .map((row) => {
+            let cols = row.split(',').map(col => col.trim());
+            
+            if (cols[0] === 'Date' || cols[0] === '日期') {
+                return null; // 跳过表头行
+            }
+            
+            if (cols.length < 6) {
+                cols = [...cols, ...Array(6 - cols.length).fill('0')];
+            }
+
+            const dateParts = cols[0].split(/[/-]/);
+            const year = parseInt(dateParts[0]);
+            const month = parseInt(dateParts[1]) - 1;
+            const day = parseInt(dateParts[2]);
+            const timestamp = new Date(year, month, day).getTime();
+
+            const parseNum = (str) => {
+                const num = parseFloat(str.replace(/[^0-9.]/g, ''));
+                return isNaN(num) ? 0 : num;
+            };
+
+            return [
+                timestamp,
+                parseNum(cols[1]),
+                parseNum(cols[2]),
+                parseNum(cols[3]),
+                parseNum(cols[4]),
+                parseNum(cols[5]) // 成交量
+            ];
+        })
+        .filter(item => item !== null);
+}
+
+// 计算移动平均线
+function calculateMA(data, dayCount) {
+    return data.map((_, idx) => {
+        const start = Math.max(0, idx - dayCount + 1);
+        const slice = data.slice(start, idx + 1);
+        const sum = slice.reduce((acc, cur) => acc + cur[4], 0);
+        return [data[idx][0], sum / slice.length];
+    });
+}
+
+// 主加载逻辑
+fetch('./')
+    .then(r => r.text())
+    .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const csvFiles = [
+    '1000万极限突破石50.csv', 
+    'ARK还原卷轴30.csv',     
+    'RED单手武器攻击力卷轴.csv',
+    'RED双手武器攻击力卷轴.csv',     
+    'RED防具或饰品强化卷轴选择券.csv',     
+    '专属饰品攻击力卷轴.csv',
+    '专属饰品魔力卷轴.csv',     
+    '中等级怪怪卡牌包.csv',     
+    '中级贝勒德戒指.csv',     
+    '伟大的卡尔洛斯灵魂.csv',
+    '伟大的希拉灵魂结晶.csv',     
+    '伟大的斯乌灵魂结晶.csv',     
+    '伟大的阿卡伊勒灵魂结晶.csv',     
+    '传奇高级骑士全身铠甲.csv',
+    '凝聚之力结晶石.csv',     
+    '匠人之心.csv',     
+    '吸血鬼披风.csv',     
+    '咒语痕迹.csv',     
+    '品克缤敲敲乐3段.csv',
+    '品克缤短剑攻击卷轴50.csv',     
+    '唯一魔方.csv',     
+    '埃苏莱布斯骑士披风.csv',     
+    '多纳尔徽章.csv',
+    '大型首领荣誉勋章.csv',     
+    '太初精髓.csv',     
+    '失控机械标记.csv',     
+    '守护天使戒指.csv',
+    '家庭咖啡店美式咖啡.csv',     
+    '小型高浓缩经验累积秘药制作配方.csv',     
+    '巨匠之戒.csv',     
+    '布坦徽章.csv',
+    '布莱克缤瞳印.csv',     
+    '帕普拉图斯瞳印.csv',     
+    '平衡之怒.csv',     
+    '强大的涅槃火焰.csv',
+    '惊人的正义混沌.csv',     
+    '拂晓吊坠.csv',     
+    '无尽辉耀骑士护肩.csv',     
+    '无尽辉耀骑士裤.csv',
+    '星之力11星强化券.csv',     
+    '星之力12星强化券.csv',     
+    '暮光祝福标记.csv',     
+    '暴风手套攻击卷轴.csv',
+    '暴风手套魔力卷轴.csv',     
+    '杜松莓种子精油.csv',     
+    '极限能量石 1亿 100.csv',     
+    '核心宝石.csv',
+    '模糊的刻印灵魂石.csv',     
+    '正义混沌卷轴50.csv',     
+    '水晶幸运徽章.csv',     
+    '永远的涅槃火焰.csv',
+    '混沌碎片.csv',     
+    '漩涡手套.csv',     
+    '潜能附加卷轴.csv',     
+    '炼金术士之戒.csv',     
+    '玲珑的黄昏精髓.csv',
+    '白金宿命剪刀.csv',     
+    '真红耳环.csv',     
+    '破损的黑色心脏.csv',     
+    '神秘之影战士手套.csv',
+    '神秘之影战士护肩.csv',     
+    '索尔艾尔达碎片.csv',     
+    '红蜗牛王徽章.csv',     
+    '纯白卷轴.csv',
+    '纯白卷轴100.csv',     
+    '纯白卷轴20.csv',     
+    '联盟荣誉勋章.csv',     
+    '蕴藏魔力的眼罩.csv',
+    '蚩尤徽章.csv',     
+    '补给型能量核心.csv',     
+    '被诅咒的魔道书-红.csv',     
+    '起源之塔荣誉勋章.csv',
+    '超级神奇魔方.csv',     
+    '迎春花花语.csv',     
+    '还原卷轴 50.csv',     
+    '闪炫魔方.csv',     
+    '防具攻击力卷轴.csv',
+    '防具魔力卷轴.csv',     
+    '附加A级潜能附加卷轴30.csv',     
+    '高级装备强化卷轴(无损坏)2张交换券.csv',
+    '高级贝勒德刻印吊坠.csv',     
+    '高级贝勒德戒指.csv',     
+    '黄昏的精髓.csv'  // 最后一个元素不需要逗号
+];
 
 
+        const container = document.getElementById('chartsContainer');
+        
+        csvFiles.forEach(file => {
+            const itemName = file.replace('.csv', '');
+            
+            const title = document.createElement('h2');
+            title.style.margin = '40px 0 20px';
+            title.innerHTML = `📈 ${itemName}`;
+            container.appendChild(title);
 
+            const chartDiv = document.createElement('div');
+            chartDiv.style.width = '100%';
+            chartDiv.style.height = '600px';
+            chartDiv.style.marginBottom = '60px';
+            container.appendChild(chartDiv);
 
+            const chart = echarts.init(chartDiv);
+            fetch(`./${file}`)
+                .then(r => r.text())
+                .then(csv => {
+                    let data = processCSV(csv);
+                    data.sort((a, b) => a[0] - b[0]);
 
+                    const option = {
+                        legend: {
+                            data: ['价格趋势图'],
+                            top: 10
+                        },
+                        grid: [
+                            { left: '10%', right: '8%', height: '55%' },
+                            
+                        ],
+                        xAxis: [
+                            { type: 'time', gridIndex: 0 },
+                            
+                        ],
+                        yAxis: [
+                            {
+                                scale: true,
+                                gridIndex: 0,
+                                axisLabel: { formatter: formatChineseUnit }
+                            },
 
+                        ],
+                        series: [
+                            {
+                                type: 'candlestick',
+                                name: 'K线',
+                                data: data.map(d => [d[0], d[1], d[2], d[3], d[4]]),
+                                itemStyle: {
+                                    color: '#00C805',
+                                    color0: '#FF0000'
+                                }
+                            },
+                            {
+                                type: 'line',
+                                name: 'MA5',
+                                data: calculateMA(data, 5),
+                                smooth: true,
+                                symbol: 'none',
+                                lineStyle: { color: '#FFA500' }
+                            },
+                            {
+                                type: 'line',
+                                name: 'MA10',
+                                data: calculateMA(data, 10),
+                                smooth: true,
+                                symbol: 'none',
+                                lineStyle: { color: '#800080' }
+                            },
 
-
-
-
+                        ],
+                        tooltip: {
+                            trigger: 'axis',
+                            axisPointer: { type: 'cross' },
+                            formatter: params => {
+                                const date = echarts.time.format(params[0].value[0], '{yyyy}/{MM}/{dd}', false);
+                                const values = {
+                                    open: params[0].value[1],
+                                    high: params[0].value[2],
+                                    low: params[0].value[3],
+                                    close: params[0].value[4],
+                                    ma5: params[1]?.value[1] || 'N/A',
+                                    ma10: params[2]?.value[1] || 'N/A',
+                                    vol: params[3]?.value || 'N/A'
+                                };
+                                return [
+                                    `<strong>${itemName}</strong>`,
+                                    `📅 日期: ${date}`,
+                                    `🔺 最高: ${formatChineseUnit(values.high)}`,
+                                    `🔻 最低: ${formatChineseUnit(values.low)}`,
+                                    `📈 MA5: ${formatChineseUnit(values.ma5)}`,
+                                    `📉 MA10: ${formatChineseUnit(values.ma10)}`
+                                ].join('<br>');
+                            }
+                        }
+                    };
+                    chart.setOption(option);
+                })
+                .catch(err => {
+                    chartDiv.innerHTML = `<p style="color:#ff4d4f;padding:15px;">⚠️ ${itemName}数据加载失败</p>`;
+                });
+        });
+    })
+    .catch(err => {
+        document.getElementById('chartsContainer').innerHTML = 
+            `<p style="color:red;padding:20px;">目录加载失败: ${err.message}</p>`;
+    });
+</script>
 
       </div>
       
