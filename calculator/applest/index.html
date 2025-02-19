@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>白金苹果抽奖模拟器</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+        }
+        body { background-color: #f8f9fa; }
+        .container { padding: 2rem; }
+        .card { border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .item-list { max-height: 400px; overflow-y: auto; }
+        .log-entry { 
+            border-left: 3px solid var(--secondary-color);
+            padding: 0.5rem 1rem;
+            margin: 0.5rem 0;
+            background: rgba(52, 152, 219, 0.05);
+        }
+        .progress-bar {
+            height: 4px;
+            background: var(--secondary-color);
+            transition: width 0.3s ease;
+        }
+        .treasure-path { color: #e74c3c; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">🎁 白金苹果抽奖模拟</h1>
+        
+        <!-- 宝物盒展示 -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card p-3">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>🎯 选择目标道具</h5>
+                            <div class="item-list" id="targetItems"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>📊 实时统计</h5>
+                            <div>当前进度: <span id="attemptCount">0</span> 次</div>
+                            <div class="progress mt-2">
+                                <div class="progress-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 控制区 -->
+        <div class="card p-3 mb-4">
+            <div class="d-flex gap-3 align-items-center">
+                <button class="btn btn-primary btn-lg" onclick="startDrawing()" id="startBtn">▶️ 开始抽取</button>
+                <button class="btn btn-danger btn-lg" onclick="stopDrawing()" id="stopBtn" disabled>⏹️ 停止</button>
+                <div class="form-check ms-auto">
+                    <input class="form-check-input" type="checkbox" id="autoContinue">
+                    <label class="form-check-label" for="autoContinue">自动继续</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- 展示区 -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card p-3">
+                    <h5>📜 抽取日志</h5>
+                    <div id="resultLogs" style="height: 400px; overflow-y: auto;"></div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card p-3">
+                    <h5>📈 频率分布</h5>
+                    <canvas id="frequencyChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+// 奖池配置数据
+const categories = [
+    {
+    name: "装备碎片",
+    probability: 0.199,
+    items: ["补给型能量核心（A级）2个","嘲弄碎片2个","交织凶兽扣","魅惑碎片2个","呐喊碎片2个","破灭碎片2个","漆黑的BOSS饰品碎片","神秘河水滴石2个","时间碎片2个","太初水滴石2个","特殊型能量核心（S级）","歪曲欲望结晶","遗留的卡尔洛斯意志"]
+  
+    },
+    {
+        name: "成长道具",
+    probability: 0.0966,
+    items: ["10个索尔艾尔达碎片交换券2个","30个核心宝石交换券","经验之核心宝石","经验值3倍券（30分钟）","经验值4倍券（30分钟）","倾向成长秘药","索尔艾尔达/索尔艾尔达碎片选择券"]
+  },
+    {
+        name: "强化道具",
+    probability: 0.3262,
+    items: ["(限定)极限突破5000万选择券","(限定)极限突破5亿选择券","1000万极限突破石100%3个","1000万极限突破石50%5个","1亿极限突破石100%","1亿极限突破石30%3个","1亿极限突破石50%2个","5亿极限突破石30%2个","5亿极限突破石50%","A级潜能附加卷轴 100%","A级潜能附加卷轴 50%","A级潜能附加卷轴 80%","S级潜能附加卷轴 30%","S级潜能附加卷轴 60%","S级潜能附加卷轴 80%","宠物装备纯白卷轴100%","宠物装备还原卷轴100%","附加A级潜能附加卷轴100%","附加A级潜能附加卷轴30%","附加S级潜能附加卷轴30%","附加S级潜能附加卷轴50%","黑暗涅槃火焰2个","金光潜能附加印章","强大的涅槃火焰2个","完美附加刻印之印","星之力10星强化券","星之力11星强化券","星之力12星强化券","星之力13星强化券","星之力14星强化券","星之力15星强化券","星之力16星强化券","星之力1星突破强化券100%（16星为止）","星之力1星突破强化券100%（17星为止）","星之力1星突破强化券100%（18星为止）","星之力1星突破强化券30%（16星为止）","星之力1星突破强化券30%（17星为止）","星之力1星突破强化券30%（18星为止）","星之力1星突破强化券50%（16星为止）","星之力1星突破强化券50%（17星为止）","星之力1星突破强化券50%（18星为止）","银光潜能附加印章","永远的涅槃火焰2个"]
+  },
+  {
+        name: "灵魂碎片",
+    probability: 0.1223,
+    items: ["阿卡伊勒灵魂碎块5个","班·雷昂灵魂结晶碎片5个","半半灵魂结晶碎片5个","贝伦灵魂结晶碎片5个","蝙蝠怪灵魂结晶碎片5个","戴米安灵魂结晶碎片5个","敦凯尔灵魂结晶碎片5个","歼灭兵器斯乌灵魂结晶碎片5个","觉醒希拉灵魂结晶碎片5个","卡尔洛斯灵魂碎片5个","卡琳的灵魂碎片5个","林波灵魂结晶碎片5个","路西德的灵魂碎片5个","麦格纳斯灵魂结晶碎片5个","皮埃尔灵魂结晶碎片5个","品克缤灵魂结晶碎片5个","斯乌灵魂结晶碎片5个","威尔灵魂结晶碎片5个","希拉灵魂结晶碎片5个","希纳斯灵魂碎块5个","血腥女王灵魂结晶碎片5个","扎昆灵魂结晶碎片5个"]
+  },
+  {
+        name: "高级装备",
+    probability: 0.2032,
+    items: ["埃苏莱布斯ESP限制器","埃苏莱布斯长杖","埃苏莱布斯穿透矛","埃苏莱布斯大锤","埃苏莱布斯大斧","埃苏莱布斯大炮","埃苏莱布斯调谐器","埃苏莱布斯短杖","埃苏莱布斯法师护肩","埃苏莱布斯法师帽","埃苏莱布斯法师手套","埃苏莱布斯法师鞋","埃苏莱布斯飞侠护肩","埃苏莱布斯飞侠帽","埃苏莱布斯飞侠披风","埃苏莱布斯飞侠手套","埃苏莱布斯飞侠套装","埃苏莱布斯飞侠鞋","埃苏莱布斯复仇斗拳","埃苏莱布斯弓","埃苏莱布斯弓箭手护肩","埃苏莱布斯弓箭手帽","埃苏莱布斯弓箭手披风","埃苏莱布斯弓箭手手套","埃苏莱布斯弓箭手套装","埃苏莱布斯弓箭手鞋","埃苏莱布斯怪扇","埃苏莱布斯海盗护肩","埃苏莱布斯海盗帽","埃苏莱布斯海盗披风","埃苏莱布斯海盗手套","埃苏莱布斯海盗套装","埃苏莱布斯海盗鞋","埃苏莱布斯环刃","埃苏莱布斯记忆长杖","埃苏莱布斯精华","埃苏莱布斯巨灵开山斧","埃苏莱布斯军刀","埃苏莱布斯宽大刀","埃苏莱布斯雷神","埃苏莱布斯灵魂手铳","埃苏莱布斯龙息臂箭","埃苏莱布斯魔法师披风","埃苏莱布斯魔法师套装","埃苏莱布斯魔力手套","埃苏莱布斯能量剑","埃苏莱布斯弩","埃苏莱布斯骑士护肩","埃苏莱布斯骑士披风","埃苏莱布斯骑士手套","埃苏莱布斯骑士套装","埃苏莱布斯骑士头盔","埃苏莱布斯骑士鞋","埃苏莱布斯枪","埃苏莱布斯拳封","埃苏莱布斯拳甲","埃苏莱布斯扇子","埃苏莱布斯双弩枪","埃苏莱布斯双头杖","埃苏莱布斯锁链","埃苏莱布斯屠龙斩","埃苏莱布斯亡命剑","埃苏莱布斯武士刀","埃苏莱布斯远古弓","埃苏莱布斯战锤","埃苏莱布斯战斧","埃苏莱布斯折叠手杖","埃苏莱布斯之刃","高级贝勒德耳环","高级贝勒德戒指","高级贝勒德刻印吊坠","高级贝勒德刻印腰带","神秘之影ESP限制器","神秘之影匕首","神秘之影草扇","神秘之影长枪","神秘之影长杖","神秘之影锤","神秘之影单手剑","神秘之影调谐器","神秘之影短枪","神秘之影短杖","神秘之影法师护肩","神秘之影法师帽","神秘之影法师披风","神秘之影法师手套","神秘之影法师套装","神秘之影法师鞋","神秘之影飞侠护肩","神秘之影飞侠帽","神秘之影飞侠披风","神秘之影飞侠手套","神秘之影飞侠套装","神秘之影飞侠鞋","神秘之影斧","神秘之影弓","神秘之影弓箭手护肩","神秘之影弓箭手帽","神秘之影弓箭手披风","神秘之影弓箭手手套","神秘之影弓箭手套装","神秘之影弓箭手鞋","神秘之影攻城炮","神秘之影海盗护肩","神秘之影海盗帽","神秘之影海盗披风","神秘之影海盗手套","神秘之影海盗套装","神秘之影海盗鞋","神秘之影环刃","神秘之影机甲枪","神秘之影记忆长杖","神秘之影精华","神秘之影灵魂手铳","神秘之影龙息臂箭","神秘之影矛","神秘之影魔力手套","神秘之影能量剑","神秘之影弩","神秘之影拳封","神秘之影拳套","神秘之影刃","神秘之影手杖","神秘之影双弩枪","神秘之影双手锤","神秘之影双手剑","神秘之影双手战斧","神秘之影双头杖","神秘之影锁链","神秘之影亡命剑","神秘之影武士刀","神秘之影幸运道具卷轴","神秘之影远古弓","神秘之影战士护肩","神秘之影战士帽","神秘之影战士披风","神秘之影战士手套","神秘之影战士套装","神秘之影战士鞋","神秘之影折扇","神秘之影指节","无尽辉耀法师护肩","无尽辉耀飞侠衬衫","无尽辉耀飞侠护肩","无尽辉耀飞侠裤","无尽辉耀飞侠披风","无尽辉耀飞侠手套","无尽辉耀飞侠头巾","无尽辉耀飞侠鞋","无尽辉耀弓箭手斗篷","无尽辉耀弓箭手护肩","无尽辉耀弓箭手裤","无尽辉耀弓箭手帽","无尽辉耀弓箭手披风","无尽辉耀弓箭手手套","无尽辉耀弓箭手鞋","无尽辉耀海盗大衣","无尽辉耀海盗护肩","无尽辉耀海盗裤","无尽辉耀海盗帽","无尽辉耀海盗披风","无尽辉耀海盗手套","无尽辉耀海盗鞋","无尽辉耀魔法师长袍","无尽辉耀魔法师裤","无尽辉耀魔法师帽","无尽辉耀魔法师手套","无尽辉耀魔法师鞋","无尽辉耀骑士护肩","无尽辉耀骑士裤","无尽辉耀骑士盔甲","无尽辉耀骑士披风","无尽辉耀骑士手套","无尽辉耀骑士头盔","无尽辉耀骑士鞋","无尽辉耀者魔法师披风"]
+  },
+    {
+        name: "其他物品",
+        probability: 0.0527,
+        items: [
+            { name: "幸运白金宝物箱", isTreasureBox: true, openCategory: "白金宝箱奖励" },
+            { name: "幸运璀璨宝物箱", isTreasureBox: true, openCategory: "璀璨宝箱奖励" },
+            "封印解除卷轴",
+            "100%卷轴40格背包",
+            "灵魂结晶40格背包",
+            "配方40格背包",
+            "智能机器人商店使用券（30天）"
+        ]
+    },
+    
+    {
+        name: "白金宝箱奖励",
+        probability: 1.0,
+        subCategories: [
+            {
+                name: "强化道具",
+                probability: 0.3155,
+                items: [
+                    "10亿极限突破石",
+                    "附加S级潜能附加卷轴100%",
+                    "深渊的涅槃火焰50个",
+                    "星之力15星强化券",
+                    "星之力16星强化券",
+                    "星之力17星强化券"
+                ]
+            },
+            {
+                name: "高级装备",
+                probability: 0.5130,
+                items: [
+                    "4级暴击伤害戒指交换券",
+                    "4级风险之戒交换券",
+                    "4级集成之戒交换券",
+                    "粉色圣杯",
+                    "愤怒的扎昆腰带",
+                    "皇家黑色金属护肩",
+                    "水晶幸运徽章"
+                ]
+            },
+            {
+                name: "伟大灵魂",
+                probability: 0.1715,
+                items: [
+                    "伟大的阿卡伊勒灵魂结晶",
+                    "伟大的班·雷昂灵魂结晶",
+                    "伟大的蝙蝠怪灵魂结晶",
+                    "伟大的品克缤灵魂结晶",
+                    "伟大的扎昆灵魂结晶"
+                ]
+            }
+        ]
+    },
+    {
+        name: "璀璨宝箱奖励",
+        probability: 1.0,
+        subCategories: [
+            {
+                name: "强化道具",
+                probability: 0.4097,
+                items: [
+                    "(限定)极限突破20亿选择券5个",
+                    "附加S级潜能附加卷轴100%",
+                    "深渊的涅槃火焰100个",
+                    "星之力16星强化券",
+                    "星之力17星强化券",
+                    "星之力18星强化券"
+                ]
+            },
+            {
+                name: "高级装备",
+                probability: 0.5069,
+                items: [
+                    "4级持续之戒交换券",
+                    "4级克制之戒交换券",
+                    "4级武器增益选择箱",
+                    "艾斯泰拉耳环",
+                    "拂晓吊坠",
+                    "黎明之守护天使戒指",
+                    "暮光祝福标记",
+                    "神秘之影防具箱",
+                    "神秘之影武器箱",
+                    "最高级贝勒德耳环",
+                    "最高级贝勒德戒指"
+                ]
+            },
+            {
+                name: "伟大灵魂",
+                probability: 0.0833,
+                items: [
+                    "伟大的歼灭兵器斯乌灵魂结晶",
+                    "伟大的卡尔洛斯灵魂",
+                    "伟大的卡琳灵魂",
+                    "伟大的林波灵魂结晶"
+                ]
+            }
+        ]
+    }
+];
+
+let isDrawing = false;
+let attempts = 0;
+let stats = {};
+let chart = null;
+
+// 初始化目标选项
+function initTargets() {
+    const container = document.getElementById('targetItems');
+    const allItems = deepScanCategories(categories);
+    
+    container.innerHTML = allItems.filter(item => !item.isTreasureBox).map(item => `
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="${item.name}" 
+                   id="${item.name}" ${item.probability < 0.01 ? 'disabled' : ''}>
+            <label class="form-check-label" for="${item.name}">
+                ${item.name} 
+                ${item.probability < 0.01 ? '✨' : ''}
+            </label>
+        </div>
+    `).join('');
+}
+
+// 递归扫描所有道具
+function deepScanCategories(catList, path = [], result = []) {
+    for (const category of catList) {
+        const newPath = [...path, category.name];
+        if (category.subCategories) {
+            deepScanCategories(category.subCategories, newPath, result);
+        }
+        if (category.items) {
+            category.items.forEach(item => {
+                const isBox = typeof item === 'object' && item.isTreasureBox;
+                result.push({
+                    name: typeof item === 'string' ? item : item.name,
+                    probability: calculateProbability(newPath, item),
+                    isTreasureBox: isBox,
+                    path: [...newPath]
+                });
+            });
+        }
+    }
+    return result;
+}
+
+// 计算实际概率
+function calculateProbability(path, item) {
+    let probability = 1;
+    let currentLevel = categories;
+    
+    for (const levelName of path) {
+        const currentCat = currentLevel.find(c => c.name === levelName);
+        probability *= currentCat.probability;
+        if (currentCat.subCategories) {
+            currentLevel = currentCat.subCategories;
+        }
+    }
+    
+    if (typeof item === 'object') {
+        const parentCat = currentLevel.find(c => c.items.includes(item));
+        probability *= parentCat.probability;
+    }
+    
+    return probability;
+}
+
+// 递归抽奖核心逻辑
+function drawItem(currentCategories = categories) {
+    const rand = Math.random();
+    let accumulated = 0;
+
+    for (const category of currentCategories) {
+        accumulated += category.probability;
+        if (rand <= accumulated) {
+            if (category.subCategories) {
+                return drawItem(category.subCategories);
+            }
+            
+            const item = category.items[Math.floor(Math.random() * category.items.length)];
+            if (typeof item === 'object' && item.isTreasureBox) {
+                const treasureCat = categories.find(c => c.name === item.openCategory);
+                return {
+                    name: item.name,
+                    subItem: drawItem(treasureCat.subCategories),
+                    isTreasureBox: true
+                };
+            }
+            return typeof item === 'string' ? item : item.name;
+        }
+    }
+    return '未中奖';
+}
+
+// 处理抽奖结果
+function processResult(result) {
+    let finalItem = result;
+    const path = [];
+    
+    while (typeof finalItem === 'object') {
+        path.push(finalItem.name);
+        finalItem = finalItem.subItem;
+    }
+    path.push(finalItem);
+    
+    return {
+        finalItem,
+        path: path.join(' → ')
+    };
+}
+
+async function startDrawing() {
+    if (isDrawing) return;
+    
+    const targets = getSelectedTargets();
+    if (targets.length === 0) {
+        alert('请至少选择一个目标道具！');
+        return;
+    }
+
+    isDrawing = true;
+    toggleControls(true);
+    attempts = 0;
+    stats = {};
+    
+    while (isDrawing) {
+        const rawResult = drawItem();
+        const { finalItem, path } = processResult(rawResult);
+        attempts++;
+        
+        // 更新统计
+        stats[finalItem] = (stats[finalItem] || 0) + 1;
+        
+        // 更新显示
+        addLogEntry(path);
+        updateProgress();
+        
+        // 命中检测
+        if (targets.includes(finalItem)) {
+            showSuccess(finalItem);
+            if (!document.getElementById('autoContinue').checked) {
+                stopDrawing();
+                break;
+            }
+        }
+        
+        // 性能优化
+        if (attempts % 100 === 0) {
+            updateChart();
+            await new Promise(resolve => setTimeout(resolve, 0));
+        }
+    }
+}
+
+// 界面更新函数
+function addLogEntry(path) {
+    const log = document.getElementById('resultLogs');
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    entry.innerHTML = `<span class="text-muted">#${attempts}</span> ${path}`;
+    log.prepend(entry);
+}
+
+function updateProgress() {
+    document.getElementById('attemptCount').textContent = attempts;
+    const progress = Math.min(100, (attempts % 1000) / 10);
+    document.querySelector('.progress-bar').style.width = `${progress}%`;
+}
+
+function showSuccess(item) {
+    const log = document.getElementById('resultLogs');
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    entry.innerHTML = `
+        <div class="alert alert-success mt-2">
+            🎉 成功获得 【${item}】! 总计尝试次数: ${attempts}
+        </div>
+    `;
+    log.prepend(entry);
+}
+
+// 图表相关
+function updateChart() {
+    const items = Object.entries(stats)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 20);
+
+    if (!chart) {
+        const ctx = document.getElementById('frequencyChart').getContext('2d');
+        chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: items.map(i => i[0]),
+                datasets: [{
+                    label: '出现次数',
+                    data: items.map(i => i[1]),
+                    backgroundColor: '#3498db'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true },
+                    x: { ticks: { autoSkip: false, maxRotation: 45 } }
+                }
+            }
+        });
+    } else {
+        chart.data.labels = items.map(i => i[0]);
+        chart.data.datasets[0].data = items.map(i => i[1]);
+        chart.update();
+    }
+}
+
+// 辅助函数
+function getSelectedTargets() {
+    return [...document.querySelectorAll('input[type="checkbox"]:checked')].map(c => c.value);
+}
+
+function toggleControls(running) {
+    document.getElementById('startBtn').disabled = running;
+    document.getElementById('stopBtn').disabled = !running;
+}
+
+function stopDrawing() {
+    isDrawing = false;
+    toggleControls(false);
+    updateChart();
+}
+
+// 初始化
+window.onload = () => {
+    initTargets();
+    updateChart();
+};
+</script>
+</body>
+</html>
