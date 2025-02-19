@@ -338,7 +338,9 @@ async function startDrawing() {
     toggleControls(true);
     attempts = 0;
     stats = {};
-    
+    let acquiredTargets = {}; // 初始化目标状态跟踪
+    targets.forEach(t => acquiredTargets[t] = false);
+
     while (isDrawing) {
         const rawResult = drawItem();
         const { finalItem, path } = processResult(rawResult);
@@ -353,10 +355,20 @@ async function startDrawing() {
         
         // 命中检测
         if (targets.includes(finalItem)) {
-            showSuccess(finalItem);
-            if (!document.getElementById('autoContinue').checked) {
-                stopDrawing();
-                break;
+            acquiredTargets[finalItem] = true; // 标记该目标已获取
+            showSuccess(finalItem, acquiredTargets, targets.length); // 显示当前进度
+            
+            // 检查是否所有目标都已获取
+            const allAcquired = Object.values(acquiredTargets).every(v => v);
+            if (allAcquired) {
+                showAllSuccess(attempts); // 显示全部完成提示
+                if (!document.getElementById('autoContinue').checked) {
+                    stopDrawing();
+                    break;
+                } else {
+                    // 自动继续时重置目标状态
+                    targets.forEach(t => acquiredTargets[t] = false);
+                }
             }
         }
         
@@ -383,18 +395,29 @@ function updateProgress() {
     document.querySelector('.progress-bar').style.width = `${progress}%`;
 }
 
-function showSuccess(item) {
+function showSuccess(item, acquiredTargets, total) {
+    const acquiredCount = Object.values(acquiredTargets).filter(v => v).length;
     const log = document.getElementById('resultLogs');
     const entry = document.createElement('div');
     entry.className = 'log-entry';
     entry.innerHTML = `
         <div class="alert alert-success mt-2">
-            🎉 成功获得 【${item}】! 总计尝试次数: ${attempts}
+            ✅ 获得 【${item}】 (${acquiredCount}/${total})
         </div>
     `;
     log.prepend(entry);
 }
-
+function showAllSuccess(attempts) {
+    const log = document.getElementById('resultLogs');
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    entry.innerHTML = `
+        <div class="alert alert-success mt-2">
+            🎉 已收集所有目标道具！总计尝试次数: ${attempts}
+        </div>
+    `;
+    log.prepend(entry);
+}
 // 图表相关
 function updateChart() {
     const items = Object.entries(stats)
