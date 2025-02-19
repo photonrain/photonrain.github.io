@@ -21,7 +21,155 @@ var _hmt = _hmt || [];
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
 
 
-</head><body onload="toggleLabel()">
+</head><style>
+    /* 基础样式重置 */
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        margin: 20px;
+        background-color: #f0f4f8;
+        color: #2c3e50;
+    }
+
+    /* 标题样式 */
+    .head {
+        background: linear-gradient(135deg, #2980b9, #2c3e50);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+
+    .head h1 {
+        font-size: 2.2rem;
+        text-align: center;
+        margin: 0;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    /* 导航链接 */
+    a {
+        color: #2980b9;
+        text-decoration: none;
+        transition: color 0.3s;
+        margin-right: 15px;
+    }
+
+    a:hover {
+        color: #1a5276;
+        text-decoration: underline;
+    }
+
+    a[title]:after {
+        content: " \f08e";
+        font-family: "Font Awesome 5 Free";
+        font-size: 0.8em;
+    }
+
+    /* 表单容器 */
+    .maincon {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+
+    /* 输入组样式 */
+    .form-row > div {
+        margin-bottom: 1rem;
+        display: grid;
+        grid-template-columns: 160px 1fr;
+        align-items: center;
+        gap: 5px;
+    }
+
+    label {
+        font-weight: 500;
+        color: #34495e;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+        padding: 8px 12px;
+        border: 1px solid #bdc3c7;
+        border-radius: 4px;
+        width: 100px;
+        transition: border-color 0.3s;
+    }
+
+    input:focus {
+        border-color: #2980b9;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
+    }
+
+    /* 按钮样式 */
+    button {
+        background: #2980b9;
+        color: white;
+        padding: 10px 25px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 1rem;
+        margin-top: 1rem;
+    }
+
+    button:hover {
+        background: #1a5276;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* 文本域样式 */
+    textarea {
+        border: 1px solid #bdc3c7;
+        border-radius: 6px;
+        padding: 12px;
+        font-family: monospace;
+        background-color: #f8f9fa;
+    }
+
+    /* 单选/复选框组 */
+    input[type="radio"],
+    input[type="checkbox"] {
+        margin-right: 8px;
+        transform: scale(1.1);
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+        .form-row > div {
+            grid-template-columns: 1fr;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+        }
+    }
+
+    /* 图标添加 */
+    .head h1:before {
+        content: "\f0e7";
+        font-family: "Font Awesome 5 Free";
+        margin-right: 15px;
+    }
+
+    button:after {
+        content: "\f0a0";
+        font-family: "Font Awesome 5 Free";
+        margin-left: 10px;
+    }
+</style>
+
+<!-- 在<head>中添加字体库 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<body onload="toggleLabel()">
     <div class="container-fluid head">
         <h1><span>简易火花等级计算器<br></span> </h1>
     <!-- <h1><span>class="container-fluid head"</span> </h1> -->
@@ -33,7 +181,7 @@ var _hmt = _hmt || [];
   <br>
 如果遇到计算问题可以刷新(F5)，无法解决的话，请点击下方链接私信我，感谢您的支持。
   <br>   
-火花评分系统暂时仅适用于140，150，160，200, 250等级的BOSS防具饰品
+火花评分系统暂时仅适用于140，150，160，200, 250等级的BOSS防具饰品。计算后需要刷新网页，方可重新评分
 
 <style>textarea{resize: none;}</style>&gt;
 

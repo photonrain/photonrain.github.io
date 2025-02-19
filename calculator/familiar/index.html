@@ -17410,161 +17410,284 @@ var _hmt = _hmt || [];
 })();
 </script>
   <a href="https://photonrain.github.io/" title="回到主页">首页</a>
-<br>
-简易怪怪魔方，试用版。如果遇到BUG，请点击下方链接私信我，感谢您的支持。
-<form>
-注：点击后无反应是由于还在计算，请耐心等待~
-</form>
-<a href="https://space.bilibili.com/44579584?spm_id_from=333.1007.0.0" target="_blank" title="转到B站主页">by紫电NS</a>
-<form>
-目标属性
-    <div>
-    第一条属性
-        <select id="first">
-        	<option value="0"> 力量(定值) </option>
-        	<option value="1"> 敏捷(定值) </option>
-        	<option value="2"> 智力(定值)</option>
-        	<option value="3"> 运气(定值) </option>
-        	<option value="4"> 最大血量(定值) </option>
-        	<option value="5"> 最大魔量(定值) </option>
-        	<option value="6"> 敏捷+1 </option>
-        	<option value="7"> 移动速度 </option>
-        	<option value="8"> 跳跃力 </option>
-        	<option value="9"> 物理攻击力(定值) </option>
-        	<option value="10"> 魔法攻击力(定值) </option>
-        	<option value="11"> 防御力(定值) </option>
-        	<option value="12"> 暴击率 </option>
-        	<option value="13"> 伤害 </option>
-        	<option value="14"> 全属性(定值) </option>
-        	<option value="15"> 站立恢复HP </option>
-        	<option value="16"> 站立回复MP </option>
-			<option value="17"> 力量% </option>
-        	<option value="18"> 敏捷% </option>
-        	<option value="19"> 智力%</option>
-        	<option value="20"> 运气% </option>
-        	<option value="21"> 最大血量% </option>
-        	<option value="22"> 最大魔量% </option>
-        	<option value="23"> 敏捷+1% </option>
-        	<option value="26"> 物理攻击力% </option>
-        	<option value="27"> 魔法攻击力% </option>
-        	<option value="28"> 防御力% </option>
-        	<option value="29"> 攻击时发动中毒 </option>
-        	<option value="30"> 攻击时发动眩晕 </option>
-        	<option value="31"> 攻击时发动缓慢 </option>
-        	<option value="32"> 攻击时发动黑暗 </option>
-        	<option value="33"> 攻击时发动冰冻 </option>
-        	<option value="34"> 攻击时发动封印 </option>
-        	<option value="35"> 无视防御力 </option>
-        	<option value="36"> 按照角色攻击力增加怪怪攻击力 </option>
-        	<option value="37"> 按照角色攻击力增加怪怪攻击力 </option>
-        	<option value="38"> 增益时间 </option>
-        	<option value="39"> 被动技能等级 </option>
-        	<option value="40"> 随便 </option>
-        </select>  
+<style>
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f5f7fa;
+}
+
+.form-container {
+    background: white;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+}
+
+.form-title {
+    color: #2c3e50;
+    font-size: 1.5em;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+}
+
+.attribute-group {
+    margin-bottom: 20px;
+}
+
+.attribute-group label {
+    display: block;
+    color: #34495e;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #bdc3c7;
+    border-radius: 5px;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+select:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 5px rgba(52,152,219,0.3);
+    outline: none;
+}
+
+.price-input {
+    margin: 20px 0;
+}
+
+input[type="price"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #bdc3c7;
+    border-radius: 5px;
+}
+
+button {
+    background: #3498db;
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    font-size: 1.1em;
+}
+
+button:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(52,152,219,0.4);
+}
+
+.note {
+    color: #7f8c8d;
+    font-size: 0.9em;
+    margin: 15px 0;
+    text-align: center;
+}
+
+.creator-link {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    color: #3498db;
+    text-decoration: none;
+}
+
+.creator-link:hover {
+    text-decoration: underline;
+}
+
+.loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.loading::after {
+    content: " ";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+    margin-left: 10px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+</style>
+
+<div class="form-container">
+    <h2 class="form-title">怪怪魔方属性计算器</h2>
+    
+    <div class="note">请选择您期望的属性组合</div>
+    
+    <div class="attribute-group">
+        <label>第一条属性：</label>
+        <select id="first" class="styled-select">
+            <option value="0"> 力量(定值) </option>
+          <option value="1"> 敏捷(定值) </option>
+          <option value="2"> 智力(定值)</option>
+          <option value="3"> 运气(定值) </option>
+          <option value="4"> 最大血量(定值) </option>
+          <option value="5"> 最大魔量(定值) </option>
+          <option value="6"> 敏捷+1 </option>
+          <option value="7"> 移动速度 </option>
+          <option value="8"> 跳跃力 </option>
+          <option value="9"> 物理攻击力(定值) </option>
+          <option value="10"> 魔法攻击力(定值) </option>
+          <option value="11"> 防御力(定值) </option>
+          <option value="12"> 暴击率 </option>
+          <option value="13"> 伤害 </option>
+          <option value="14"> 全属性(定值) </option>
+          <option value="15"> 站立恢复HP </option>
+          <option value="16"> 站立回复MP </option>
+      <option value="17"> 力量% </option>
+          <option value="18"> 敏捷% </option>
+          <option value="19"> 智力%</option>
+          <option value="20"> 运气% </option>
+          <option value="21"> 最大血量% </option>
+          <option value="22"> 最大魔量% </option>
+          <option value="23"> 敏捷+1% </option>
+          <option value="26"> 物理攻击力% </option>
+          <option value="27"> 魔法攻击力% </option>
+          <option value="28"> 防御力% </option>
+          <option value="29"> 攻击时发动中毒 </option>
+          <option value="30"> 攻击时发动眩晕 </option>
+          <option value="31"> 攻击时发动缓慢 </option>
+          <option value="32"> 攻击时发动黑暗 </option>
+          <option value="33"> 攻击时发动冰冻 </option>
+          <option value="34"> 攻击时发动封印 </option>
+          <option value="35"> 无视防御力 </option>
+          <option value="36"> 按照角色攻击力增加怪怪攻击力 </option>
+          <option value="37"> 按照角色攻击力增加怪怪攻击力 </option>
+          <option value="38"> 增益时间 </option>
+          <option value="39"> 被动技能等级 </option>
+          <option value="40"> 随便 </option>
+        </select>
     </div>
-    <div>
-    第二条属性
-        <select id="second"> 
-        	<option value="0"> 力量(定值) </option>
-        	<option value="1"> 敏捷(定值) </option>
-        	<option value="2"> 智力(定值)</option>
-        	<option value="3"> 运气(定值) </option>
-        	<option value="4"> 最大血量(定值) </option>
-        	<option value="5"> 最大魔量(定值) </option>
-        	<option value="6"> 敏捷+1 </option>
-        	<option value="7"> 移动速度 </option>
-        	<option value="8"> 跳跃力 </option>
-        	<option value="9"> 物理攻击力(定值) </option>
-        	<option value="10"> 魔法攻击力(定值) </option>
-        	<option value="11"> 防御力(定值) </option>
-        	<option value="12"> 暴击率 </option>
-        	<option value="13"> 伤害 </option>
-        	<option value="14"> 全属性(定值) </option>
-        	<option value="15"> 站立恢复HP </option>
-        	<option value="16"> 站立回复MP </option>
-			<option value="17"> 力量% </option>
-        	<option value="18"> 敏捷% </option>
-        	<option value="19"> 智力%</option>
-        	<option value="20"> 运气% </option>
-        	<option value="21"> 最大血量% </option>
-        	<option value="22"> 最大魔量% </option>
-        	<option value="23"> 敏捷+1% </option>
-        	<option value="26"> 物理攻击力% </option>
-        	<option value="27"> 魔法攻击力% </option>
-        	<option value="28"> 防御力% </option>
-        	<option value="29"> 攻击时发动中毒 </option>
-        	<option value="30"> 攻击时发动眩晕 </option>
-        	<option value="31"> 攻击时发动缓慢 </option>
-        	<option value="32"> 攻击时发动黑暗 </option>
-        	<option value="33"> 攻击时发动冰冻 </option>
-        	<option value="34"> 攻击时发动封印 </option>
-        	<option value="35"> 无视防御力 </option>
-        	<option value="36"> 按照角色攻击力增加怪怪攻击力 </option>
-        	<option value="37"> 按照角色攻击力增加怪怪攻击力 </option>
-        	<option value="38"> 增益时间 </option>
-        	<option value="39"> 被动技能等级 </option>
-        	<option value="40"> 随便 </option>
-        </select>  
-    </div>
-	<div>
-    第三条属性
-        <select id="third">
-        	<option value="0"> 力量(定值) </option>
-        	<option value="1"> 敏捷(定值) </option>
-        	<option value="2"> 智力(定值)</option>
-        	<option value="3"> 运气(定值) </option>
-        	<option value="4"> 最大血量(定值) </option>
-        	<option value="5"> 最大魔量(定值) </option>
-        	<option value="6"> 敏捷+1 </option>
-        	<option value="7"> 移动速度 </option>
-        	<option value="8"> 跳跃力 </option>
-        	<option value="9"> 物理攻击力(定值) </option>
-        	<option value="10"> 魔法攻击力(定值) </option>
-        	<option value="11"> 防御力(定值) </option>
-        	<option value="12"> 暴击率 </option>
-        	<option value="13"> 伤害 </option>
-        	<option value="14"> 全属性(定值) </option>
-        	<option value="15"> 站立恢复HP </option>
-        	<option value="16"> 站立回复MP </option>
-			<option value="17"> 力量% </option>
-        	<option value="18"> 敏捷% </option>
-        	<option value="19"> 智力%</option>
-        	<option value="20"> 运气% </option>
-        	<option value="21"> 最大血量% </option>
-        	<option value="22"> 最大魔量% </option>
-        	<option value="23"> 敏捷+1% </option>
-        	<option value="26"> 物理攻击力% </option>
-        	<option value="27"> 魔法攻击力% </option>
-        	<option value="28"> 防御力% </option>
-        	<option value="29"> 攻击时发动中毒 </option>
-        	<option value="30"> 攻击时发动眩晕 </option>
-        	<option value="31"> 攻击时发动缓慢 </option>
-        	<option value="32"> 攻击时发动黑暗 </option>
-        	<option value="33"> 攻击时发动冰冻 </option>
-        	<option value="34"> 攻击时发动封印 </option>
-        	<option value="35"> 无视防御力 </option>
-        	<option value="36"> 按照角色攻击力增加怪怪攻击力 </option>
-        	<option value="37"> 按照角色攻击力增加怪怪攻击力 </option>
-        	<option value="38"> 增益时间 </option>
-        	<option value="39"> 被动技能等级 </option>
-        	<option value="40"> 随便 </option>
-        </select>  
+
+    <div class="attribute-group">
+        <label>第二条属性：</label>
+        <select id="second" class="styled-select">
+            <option value="0"> 力量(定值) </option>
+          <option value="1"> 敏捷(定值) </option>
+          <option value="2"> 智力(定值)</option>
+          <option value="3"> 运气(定值) </option>
+          <option value="4"> 最大血量(定值) </option>
+          <option value="5"> 最大魔量(定值) </option>
+          <option value="6"> 敏捷+1 </option>
+          <option value="7"> 移动速度 </option>
+          <option value="8"> 跳跃力 </option>
+          <option value="9"> 物理攻击力(定值) </option>
+          <option value="10"> 魔法攻击力(定值) </option>
+          <option value="11"> 防御力(定值) </option>
+          <option value="12"> 暴击率 </option>
+          <option value="13"> 伤害 </option>
+          <option value="14"> 全属性(定值) </option>
+          <option value="15"> 站立恢复HP </option>
+          <option value="16"> 站立回复MP </option>
+      <option value="17"> 力量% </option>
+          <option value="18"> 敏捷% </option>
+          <option value="19"> 智力%</option>
+          <option value="20"> 运气% </option>
+          <option value="21"> 最大血量% </option>
+          <option value="22"> 最大魔量% </option>
+          <option value="23"> 敏捷+1% </option>
+          <option value="26"> 物理攻击力% </option>
+          <option value="27"> 魔法攻击力% </option>
+          <option value="28"> 防御力% </option>
+          <option value="29"> 攻击时发动中毒 </option>
+          <option value="30"> 攻击时发动眩晕 </option>
+          <option value="31"> 攻击时发动缓慢 </option>
+          <option value="32"> 攻击时发动黑暗 </option>
+          <option value="33"> 攻击时发动冰冻 </option>
+          <option value="34"> 攻击时发动封印 </option>
+          <option value="35"> 无视防御力 </option>
+          <option value="36"> 按照角色攻击力增加怪怪攻击力 </option>
+          <option value="37"> 按照角色攻击力增加怪怪攻击力 </option>
+          <option value="38"> 增益时间 </option>
+          <option value="39"> 被动技能等级 </option>
+          <option value="40"> 随便 </option>
+        </select>
     </div>
 
-
-	<div>
-        <label>
-            魔方价格：
-            <input type="price" id="price">
-        </label>
+    <div class="attribute-group">
+        <label>第三条属性：</label>
+        <select id="third" class="styled-select">
+            <option value="0"> 力量(定值) </option>
+          <option value="1"> 敏捷(定值) </option>
+          <option value="2"> 智力(定值)</option>
+          <option value="3"> 运气(定值) </option>
+          <option value="4"> 最大血量(定值) </option>
+          <option value="5"> 最大魔量(定值) </option>
+          <option value="6"> 敏捷+1 </option>
+          <option value="7"> 移动速度 </option>
+          <option value="8"> 跳跃力 </option>
+          <option value="9"> 物理攻击力(定值) </option>
+          <option value="10"> 魔法攻击力(定值) </option>
+          <option value="11"> 防御力(定值) </option>
+          <option value="12"> 暴击率 </option>
+          <option value="13"> 伤害 </option>
+          <option value="14"> 全属性(定值) </option>
+          <option value="15"> 站立恢复HP </option>
+          <option value="16"> 站立回复MP </option>
+      <option value="17"> 力量% </option>
+          <option value="18"> 敏捷% </option>
+          <option value="19"> 智力%</option>
+          <option value="20"> 运气% </option>
+          <option value="21"> 最大血量% </option>
+          <option value="22"> 最大魔量% </option>
+          <option value="23"> 敏捷+1% </option>
+          <option value="26"> 物理攻击力% </option>
+          <option value="27"> 魔法攻击力% </option>
+          <option value="28"> 防御力% </option>
+          <option value="29"> 攻击时发动中毒 </option>
+          <option value="30"> 攻击时发动眩晕 </option>
+          <option value="31"> 攻击时发动缓慢 </option>
+          <option value="32"> 攻击时发动黑暗 </option>
+          <option value="33"> 攻击时发动冰冻 </option>
+          <option value="34"> 攻击时发动封印 </option>
+          <option value="35"> 无视防御力 </option>
+          <option value="36"> 按照角色攻击力增加怪怪攻击力 </option>
+          <option value="37"> 按照角色攻击力增加怪怪攻击力 </option>
+          <option value="38"> 增益时间 </option>
+          <option value="39"> 被动技能等级 </option>
+          <option value="40"> 随便 </option>
+        </select>
     </div>
 
-<!--  <a class="main-nav-link" href="/a">怪怪方块计算器</a> -->
+    <div class="price-input">
+        <label>魔方价格：</label>
+        <input type="price" id="price" placeholder="请输入魔方价格">
+    </div>
 
+    <div class="note">点击统计后请耐心等待计算结果...</div>
+    
+    <button type="button" onclick="contxt()" id="calculateBtn">开始统计计算</button>
+    
+    <a href="https://space.bilibili.com/44579584" 
+       class="creator-link" 
+       target="_blank" 
+       title="转到B站主页">
+        by 紫电NS - 反馈BUG
+    </a>
+</div>
 
-
-
-<button type="button" onclick="contxt()">统计计算</button>
 <!-- <button type="button" onclick="once()">单次模拟（无需设定目标属性）</button> -->
 <div id="main" style="width: 600px;height:400px;"></div>
 <script type="text/javascript">
