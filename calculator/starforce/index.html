@@ -241,6 +241,7 @@ var _hmt = _hmt || [];
                         <select id="maxStars">
                             <option value="25">25星</option>
                             <option value="30">30星</option>
+							<option value="40">30星(韩服)</option>
                         </select>
                     </div>
                     <div>
@@ -367,6 +368,38 @@ var _hmt = _hmt || [];
 				{ stars: "27→28",success: 5,   failure: 49.4,destroy:45.6, drops: true  },
 				{ stars: "28→29",success: 3,   failure: 50.44,destroy:46.56,drops:true  },
 				{ stars: "29→30",success: 1,   failure: 51.48,destroy:47.52,drops:true  }
+			],
+			40: [
+				{ stars: "0→1",   success: 95,  failure: 5,    destroy: 0,    drops: false },
+				{ stars: "1→2",   success: 90,  failure: 10,   destroy: 0,    drops: false },
+				{ stars: "2→3",   success: 85,  failure: 15,   destroy: 0,    drops: false },
+				{ stars: "3→4",   success: 85,  failure: 15,   destroy: 0,    drops: false },
+				{ stars: "4→5",   success: 80,  failure: 20,   destroy: 0,    drops: false },
+				{ stars: "5→6",   success: 75,  failure: 25,   destroy: 0,    drops: false },
+				{ stars: "6→7",   success: 70,  failure: 30,   destroy: 0,    drops: false },
+				{ stars: "7→8",   success: 65,  failure: 35,   destroy: 0,    drops: false },
+				{ stars: "8→9",   success: 60,  failure: 40,   destroy: 0,    drops: false },
+				{ stars: "9→10",  success: 55,  failure: 45,   destroy: 0,    drops: false },
+				{ stars: "10→11", success: 50,  failure: 50,   destroy: 0,    drops: false },
+				{ stars: "11→12", success: 45,  failure: 55,   destroy: 0,    drops: false },
+				{ stars: "12→13", success: 40,  failure: 60,   destroy: 0,    drops: false },
+				{ stars: "13→14", success: 35,  failure: 65,   destroy: 0,    drops: false },
+				{ stars: "14→15", success: 30,  failure: 70,   destroy: 0,    drops: false },
+				{ stars: "15→16", success: 30,  failure: 67.9,  destroy: 2.1,  drops: false },
+				{ stars: "16→17", success: 30,  failure: 67.9,  destroy: 2.1,  drops: false },
+				{ stars: "17→18", success: 15,  failure: 78.2,  destroy: 6.8,  drops: false },
+				{ stars: "18→19", success: 15,  failure: 78.2,  destroy: 6.8,  drops: false },
+				{ stars: "19→20", success: 15,  failure: 76.5,  destroy: 8.5,  drops: false },
+				{ stars: "20→21", success: 30,  failure: 59.5,  destroy: 10.5, drops: false },
+				{ stars: "21→22", success: 15,  failure: 72.25, destroy: 12.75,drops: false },
+				{ stars: "22→23", success: 15,  failure: 68,    destroy: 17,   drops: false },
+				{ stars: "23→24", success: 10,  failure: 72,    destroy: 18,   drops: false },
+				{ stars: "24→25", success: 10,  failure: 72,    destroy: 18,   drops: false },
+				{ stars: "25→26", success: 10,  failure: 72,    destroy: 18,   drops: false },
+				{ stars: "26→27", success: 7,   failure: 74.4,  destroy: 18.6, drops: false },
+				{ stars: "27→28", success: 5,   failure: 76,    destroy: 19,   drops: false },
+				{ stars: "28→29", success: 3,   failure: 77.6,  destroy: 19.4, drops: false },
+				{ stars: "29→30", success: 1,   failure: 79.2,  destroy: 19.8, drops: false }
 			]
 		};
 
@@ -429,6 +462,38 @@ var _hmt = _hmt || [];
 			27: { success: 0.05,failure: 0.494, destroy: 0.456, failureDrops: true  },
 			28: { success: 0.03,failure: 0.5044,destroy: 0.4656,failureDrops: true  },
 			29: { success: 0.01,failure: 0.5148,destroy: 0.4752,failureDrops: true  }
+		},
+			40: {
+			0:  { success: 0.95,  failure: 0.05,    destroy: 0.000, failureDrops: false },
+			1:  { success: 0.90,  failure: 0.10,    destroy: 0.000, failureDrops: false },
+			2:  { success: 0.85,  failure: 0.15,    destroy: 0.000, failureDrops: false },
+			3:  { success: 0.85,  failure: 0.15,    destroy: 0.000, failureDrops: false },
+			4:  { success: 0.80,  failure: 0.20,    destroy: 0.000, failureDrops: false },
+			5:  { success: 0.75,  failure: 0.25,    destroy: 0.000, failureDrops: false },
+			6:  { success: 0.70,  failure: 0.30,    destroy: 0.000, failureDrops: false },
+			7:  { success: 0.65,  failure: 0.35,    destroy: 0.000, failureDrops: false },
+			8:  { success: 0.60,  failure: 0.40,    destroy: 0.000, failureDrops: false },
+			9:  { success: 0.55,  failure: 0.45,    destroy: 0.000, failureDrops: false },
+			10: { success: 0.50,  failure: 0.50,    destroy: 0.000, failureDrops: false },
+			11: { success: 0.45,  failure: 0.55,    destroy: 0.000, failureDrops: false },
+			12: { success: 0.40,  failure: 0.60,    destroy: 0.000, failureDrops: false },
+			13: { success: 0.35,  failure: 0.65,    destroy: 0.000, failureDrops: false },
+			14: { success: 0.30,  failure: 0.70,    destroy: 0.000, failureDrops: false },
+			15: { success: 0.30,  failure: 0.679,   destroy: 0.021, failureDrops: false },
+			16: { success: 0.30,  failure: 0.679,   destroy: 0.021, failureDrops: false },
+			17: { success: 0.15,  failure: 0.782,   destroy: 0.068, failureDrops: false },
+			18: { success: 0.15,  failure: 0.782,   destroy: 0.068, failureDrops: false },
+			19: { success: 0.15,  failure: 0.765,   destroy: 0.085, failureDrops: false },
+			20: { success: 0.30,  failure: 0.595,   destroy: 0.105, failureDrops: false },
+			21: { success: 0.15,  failure: 0.7225,  destroy: 0.1275,failureDrops: false },
+			22: { success: 0.15,  failure: 0.68,    destroy: 0.17,  failureDrops: false },
+			23: { success: 0.10,  failure: 0.72,    destroy: 0.18,  failureDrops: false },
+			24: { success: 0.10,  failure: 0.72,    destroy: 0.18,  failureDrops: false },
+			25: { success: 0.10,  failure: 0.72,    destroy: 0.18,  failureDrops: false },
+			26: { success: 0.07,  failure: 0.744,   destroy: 0.186, failureDrops: false },
+			27: { success: 0.05,  failure: 0.76,    destroy: 0.19,  failureDrops: false },
+			28: { success: 0.03,  failure: 0.776,   destroy: 0.194, failureDrops: false },
+			29: { success: 0.01,  failure: 0.792,   destroy: 0.198, failureDrops: false }
 		}
         };
 
@@ -530,7 +595,7 @@ var _hmt = _hmt || [];
                 }
                 simulateStep(state, config);
                 updateResults(state);
-            }, 0.00001);
+            }, 0.0001);
         }
 
         function simulateStep(state, config) {
