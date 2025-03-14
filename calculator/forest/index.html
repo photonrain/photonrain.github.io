@@ -160,40 +160,45 @@ var _hmt = _hmt || [];
         }
 
         async function startConditionalDraw() {
-            if(isDrawing) return;
-            isDrawing = true;
-            const condition = getSelectedCondition();
-            const statusElement = document.getElementById('drawingStatus');
-            let count = 0;
-            const maxAttempts = 5000;
-            
-            statusElement.style.display = 'block';
-            statusElement.textContent = "准备抽奖...";
-            
-            while(count < maxAttempts) {
-                count++;
-                const result = singleDraw();
-                
-                if(condition(result)) {
-                    statusElement.innerHTML = `🎉 在第 ${count} 次抽中 ${result}！`;
-                    break;
-                }
-                
-                // 定期更新界面
-                if(count % 50 === 0) {
-                    statusElement.textContent = `已尝试 ${count} 次...`;
-                    await new Promise(resolve => setTimeout(resolve, 0));
-                    updateUI();
-                }
-            }
-            
-            if(count >= maxAttempts) {
-                statusElement.innerHTML = "⚠️ 已达到安全限制（5000次）仍未抽中";
-            }
-            
-            updateUI();
-            isDrawing = false;
+    if(isDrawing) return;
+    isDrawing = true;
+    const condition = getSelectedCondition();
+    const statusElement = document.getElementById('drawingStatus');
+    let count = 0;
+    const maxAttempts = 5000;
+    let totalGain = 0; // 新增收益累计
+    
+    statusElement.style.display = 'block';
+    statusElement.textContent = "准备抽奖...";
+    
+    while(count < maxAttempts) {
+        count++;
+        const result = singleDraw();
+        totalGain += result.value; // 记录每次收益
+        
+        if(condition(result.type)) { // 修正判断逻辑
+            statusElement.innerHTML = `🎉 在第 ${count} 次抽中 ${result.type}！`;
+            break;
         }
+        
+        if(count % 50 === 0) {
+            statusElement.textContent = `已尝试 ${count} 次...`;
+            await new Promise(resolve => setTimeout(resolve, 0));
+            updateUI();
+        }
+    }
+    
+    // 最终计算成本
+    const totalCost = parseInt(document.getElementById('cost').value) * count;
+    profit += totalGain - totalCost;
+    
+    if(count >= maxAttempts) {
+        statusElement.innerHTML = "⚠️ 已达到安全限制（5000次）仍未抽中";
+    }
+    
+    updateUI();
+    isDrawing = false;
+}
 
         // 保持其他函数不变
         function getPrice(type) {
