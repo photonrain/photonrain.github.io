@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?b52ffcdf33a045f844b6558bb382a915";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<head>
+    <meta charset="UTF-8">
+    <title>冒险岛星之力强化模拟器</title>
+	
+    <style>
+			.probability-table {
+			width: 100%;
+			border-collapse: collapse;
+			margin: 20px 0;
+			background: white;
+			border-radius: 12px;
+			overflow: hidden;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+		}
+
+		.probability-table th {
+			background: linear-gradient(135deg, var(--primary), #1976D2);
+			color: white;
+			padding: 16px;
+			font-weight: 600;
+			text-align: center;
+		}
+
+		.probability-table td {
+			padding: 14px;
+			text-align: center;
+			border-bottom: 1px solid #f0f0f0;
+		}
+
+		.probability-table tr:nth-child(even) {
+			background-color: #f8f9fa;
+		}
+
+		.probability-table tr:hover {
+			background-color: #f1f8ff;
+		}
+
+		/* 颜色标识 */
+		.success-rate { color: #4CAF50; font-weight: 600; }
+		.failure-rate { color: #f44336; font-weight: 600; }
+		.destroy-rate { color: #9C27B0; font-weight: 600; }
+
+		/* 响应式处理 */
+		@media (max-width: 768px) {
+			.probability-table {
+				display: block;
+				overflow-x: auto;
+			}
+		}
+        :root {
+            --primary: #2196F3;
+            --secondary: #FF9800;
+            --background: #f5f5f5;
+            --text: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--background);
+            margin: 0;
+            padding: 20px;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+            padding: 30px;
+        }
+
+        .control-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .control-group {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        select, input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, input[type="number"]:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary), #1976D2);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        #stopButton {
+            background: linear-gradient(135deg, #ff5722, #f4511e);
+        }
+
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .results-panel {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .stats-card {
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .stat-item {
+            margin: 20px 0;
+            font-size: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 1.2em;
+        }
+
+        .histogram {
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .bar-container {
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bar-label {
+            width: 100px;
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .bar {
+            height: 35px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 6px;
+            transition: width 0.5s ease-out;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            color: white;
+            font-weight: 600;
+            min-width: 50px;
+        }
+
+        h2 {
+            color: var(--text);
+            margin-top: 0;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; margin-bottom: 30px;">🌟 星之力强化模拟器</h1>
+		<h6 style="text-align: center; margin-bottom: 5px;">    by 紫电NS 
+    <a href="https://photonrain.github.io/" class="ms-3" style="color: #3498db; text-decoration: none;">网站首页</a>
+	<h6 style="text-align: center; margin-bottom: 5px;">25星为国服实际情况；30星为韩服魔改结果：额外增加掉星、损坏率(双倍)，快来挑战一下吧:D</h6>
+</h6>
+<h5 class="text-center mb-4">
+        
+        <div class="control-panel">
+            <div class="control-group">
+                <label>⚙️ 强化规则</label>
+                <div style="display: grid; gap: 15px;">
+                    <div>
+                        <label>星星上限：</label>
+                        <select id="maxStars">
+                            <option value="25">25星</option>
+                            <option value="30">30星</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>当前星星数：</label>
+                        <input type="number" id="currentStars" min="0" max="25" value="15">
+                    </div>
+                    <div>
+                        <label>目标星数：</label>
+                        <input type="number" id="targetStars" placeholder="输入目标星数" min="0" max="25">
+                    </div>
+                    <div>
+                        <label>损坏后星数：</label>
+                        <input type="number" id="destroyedStars" min="0" max="30" value="6">
+                    </div>
+                </div>
+
+                <div style="display: grid; gap: 10px; margin-top: 15px;">
+                    <label>
+                        <input type="checkbox" id="sundayMode"> 周日必成模式
+                        <span style="color: #666; font-size: 0.9em;">(5→6/10→11/15→16必定成功)</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" id="noDrop"> 失败不掉星
+                    </label>
+                    <label>
+                        <input type="checkbox" id="antiExplode"> 防爆模式
+                        <span style="color: #666; font-size: 0.9em;">(12-16星)</span>
+                    </label>
+                </div>
+            </div>
+
+            
+        </div>
+
+        <div class="button-group">
+            <button id="startButton" onclick="startSimulation()">🚀 开始强化</button>
+            <button id="stopButton" onclick="stopSimulation()" disabled>⏹ 停止模拟</button>
+        </div>
+
+        <div class="results-panel">
+            <div class="stats-card">
+                <h2>📊 统计结果</h2>
+                <div class="stat-item">
+                    <span>当前星数：</span>
+                    <span class="stat-value" id="finalStars">-</span>
+                </div>
+                <div class="stat-item">
+                    <span>尝试次数：</span>
+                    <span class="stat-value" id="attempts">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>装备损坏：</span>
+                    <span class="stat-value" id="destroys">0</span>
+                </div>
+            </div>
+
+            <div class="histogram">
+                <h2>📈 星数分布</h2>
+                <div id="chart"></div>
+            </div>
+        </div>
+    </div>
+	<div class="control-group">
+				<label>📜 星之力概率表</label>
+				<div id="probabilityTable" style="margin-top: 10px;"></div>
+			</div>
+    <script>
+		const probabilityData = {
+			25: [
+				{ stars: "0→1",  success: 85,  failure: 15,  destroy: 0,   drops: false },
+				{ stars: "1→2",  success: 80,  failure: 20,  destroy: 0,   drops: false },
+				{ stars: "2→3",  success: 75,  failure: 25,  destroy: 0,   drops: false },
+				{ stars: "3→4",  success: 75,  failure: 25,  destroy: 0,   drops: false },
+				{ stars: "4→5",  success: 70,  failure: 30,  destroy: 0,   drops: false },
+				{ stars: "5→6",  success: 65,  failure: 35,  destroy: 0,   drops: false },
+				{ stars: "6→7",  success: 60,  failure: 40,  destroy: 0,   drops: false },
+				{ stars: "7→8",  success: 55,  failure: 45,  destroy: 0,   drops: false },
+				{ stars: "8→9",  success: 50,  failure: 50,  destroy: 0,   drops: false },
+				{ stars: "9→10", success: 45,  failure: 55,  destroy: 0,   drops: false },
+				{ stars: "10→11",success: 40,  failure: 60,  destroy: 0,   drops: false },
+				{ stars: "11→12",success: 30,  failure: 68.6,destroy: 1.4, drops: true  },
+				{ stars: "12→13",success: 25,  failure: 72.7,destroy: 2.3, drops: true  },
+				{ stars: "13→14",success: 25,  failure: 72,  destroy: 3,   drops: true  },
+				{ stars: "14→15",success: 20,  failure: 76,  destroy: 4,   drops: true  },
+				{ stars: "15→16",success: 20,  failure: 75.2,destroy: 4.8, drops: false },
+				{ stars: "16→17",success: 20,  failure: 74.4,destroy: 5.6, drops: true  },
+				{ stars: "17→18",success: 20,  failure: 73.6,destroy: 6.4, drops: true  },
+				{ stars: "18→19",success: 15,  failure: 77.3,destroy: 7.7, drops: true  },
+				{ stars: "19→20",success: 15,  failure: 76.5,destroy: 8.5, drops: true  },
+				{ stars: "20→21",success: 15,  failure: 74.8,destroy: 10.2,drops: false },
+				{ stars: "21→22",success: 10,  failure: 76.5,destroy: 13.5,drops: true  },
+				{ stars: "22→23",success: 3,   failure: 77.6,destroy: 19.4,drops: true  },
+				{ stars: "23→24",success: 2,   failure: 68.6,destroy: 29.4,drops: true  },
+				{ stars: "24→25",success: 1,   failure: 59.4,destroy: 39.6,drops: true  }
+			],
+			30: [
+				{ stars: "0→1",  success: 85,  failure: 15,  destroy: 0,   drops: false },
+				{ stars: "1→2",  success: 80,  failure: 20,  destroy: 0,   drops: false },
+				{ stars: "2→3",  success: 75,  failure: 25,  destroy: 0,   drops: false },
+				{ stars: "3→4",  success: 75,  failure: 25,  destroy: 0,   drops: false },
+				{ stars: "4→5",  success: 70,  failure: 30,  destroy: 0,   drops: false },
+				{ stars: "5→6",  success: 65,  failure: 35,  destroy: 0,   drops: false },
+				{ stars: "6→7",  success: 60,  failure: 40,  destroy: 0,   drops: false },
+				{ stars: "7→8",  success: 55,  failure: 45,  destroy: 0,   drops: false },
+				{ stars: "8→9",  success: 50,  failure: 50,  destroy: 0,   drops: false },
+				{ stars: "9→10", success: 45,  failure: 55,  destroy: 0,   drops: false },
+				{ stars: "10→11",success: 40,  failure: 60,  destroy: 0,   drops: false },
+				{ stars: "11→12",success: 30,  failure: 68.6,destroy: 1.4, drops: true  },
+				{ stars: "12→13",success: 25,  failure: 72.7,destroy: 2.3, drops: true  },
+				{ stars: "13→14",success: 25,  failure: 72,  destroy: 3,   drops: true  },
+				{ stars: "14→15",success: 20,  failure: 76,  destroy: 4,   drops: true  },
+				{ stars: "15→16",success: 20,  failure: 74.96,destroy:5.04,drops: false },
+				{ stars: "16→17",success: 20,  failure: 74.96,destroy:5.04,drops: true  },
+				{ stars: "17→18",success: 20,  failure: 63.68,destroy:16.32,drops:true  },
+				{ stars: "18→19",success: 15,  failure: 68.68,destroy:16.32,drops:true  },
+				{ stars: "19→20",success: 15,  failure: 64.6,destroy:20.4, drops: true  },
+				{ stars: "20→21",success: 15,  failure: 59.8,destroy:25.2, drops: false },
+				{ stars: "21→22",success: 10,  failure: 59.4,destroy:30.6, drops: true  },
+				{ stars: "22→23",success: 10,  failure: 49.2,destroy:40.8, drops: true  },
+				{ stars: "23→24",success: 10,  failure: 46.8,destroy:43.2, drops: true  },
+				{ stars: "24→25",success: 10,  failure: 46.8,destroy:43.2, drops: true  },
+				{ stars: "25→26",success: 9,   failure: 47.8,destroy:43.2, drops: true  },
+				{ stars: "26→27",success: 7,   failure: 48.36,destroy:44.64,drops:true  },
+				{ stars: "27→28",success: 5,   failure: 49.4,destroy:45.6, drops: true  },
+				{ stars: "28→29",success: 3,   failure: 50.44,destroy:46.56,drops:true  },
+				{ stars: "29→30",success: 1,   failure: 51.48,destroy:47.52,drops:true  }
+			]
+		};
+
+        const probabilityTable = {
+            25: {
+                0:  { success: 0.85,  failure: 0.15,   destroy: 0.000, failureDrops: false },
+                1:  { success: 0.80,  failure: 0.20,   destroy: 0.000, failureDrops: false },
+                2:  { success: 0.75,  failure: 0.25,   destroy: 0.000, failureDrops: false },
+                3:  { success: 0.75,  failure: 0.25,   destroy: 0.000, failureDrops: false },
+                4:  { success: 0.70,  failure: 0.30,   destroy: 0.000, failureDrops: false },
+                5:  { success: 0.65,  failure: 0.35,   destroy: 0.000, failureDrops: false },
+                6:  { success: 0.60,  failure: 0.40,   destroy: 0.000, failureDrops: false },
+                7:  { success: 0.55,  failure: 0.45,   destroy: 0.000, failureDrops: false },
+                8:  { success: 0.50,  failure: 0.50,   destroy: 0.000, failureDrops: false },
+                9:  { success: 0.45,  failure: 0.55,   destroy: 0.000, failureDrops: false },
+                10: { success: 0.40,  failure: 0.60,   destroy: 0.000, failureDrops: false },
+                11: { success: 0.30,  failure: 0.686,  destroy: 0.014, failureDrops: true },
+                12: { success: 0.25,  failure: 0.727,  destroy: 0.023, failureDrops: true },
+                13: { success: 0.25,  failure: 0.72,   destroy: 0.030, failureDrops: true },
+                14: { success: 0.20,  failure: 0.76,   destroy: 0.040, failureDrops: true },
+                15: { success: 0.20,  failure: 0.752,  destroy: 0.048, failureDrops: false },
+                16: { success: 0.20,  failure: 0.744,  destroy: 0.056, failureDrops: true },
+                17: { success: 0.20,  failure: 0.736,  destroy: 0.064, failureDrops: true },
+                18: { success: 0.15,  failure: 0.773,  destroy: 0.077, failureDrops: true },
+                19: { success: 0.15,  failure: 0.765,  destroy: 0.085, failureDrops: true },
+                20: { success: 0.15,  failure: 0.748,  destroy: 0.102, failureDrops: false },
+                21: { success: 0.10,  failure: 0.765,  destroy: 0.135, failureDrops: true },
+                22: { success: 0.03,  failure: 0.776,  destroy: 0.194, failureDrops: true },
+                23: { success: 0.02,  failure: 0.686,  destroy: 0.294, failureDrops: true },
+                24: { success: 0.01,  failure: 0.594,  destroy: 0.396, failureDrops: true }
+            },
+            30: {
+			0:  { success: 0.85,  failure: 0.15,   destroy: 0.000, failureDrops: false },
+			1:  { success: 0.80,  failure: 0.20,   destroy: 0.000, failureDrops: false },
+			2:  { success: 0.75,  failure: 0.25,   destroy: 0.000, failureDrops: false },
+			3:  { success: 0.75,  failure: 0.25,   destroy: 0.000, failureDrops: false },
+			4:  { success: 0.70,  failure: 0.30,   destroy: 0.000, failureDrops: false },
+			5:  { success: 0.65,  failure: 0.35,   destroy: 0.000, failureDrops: false },
+			6:  { success: 0.60,  failure: 0.40,   destroy: 0.000, failureDrops: false },
+			7:  { success: 0.55,  failure: 0.45,   destroy: 0.000, failureDrops: false },
+			8:  { success: 0.50,  failure: 0.50,   destroy: 0.000, failureDrops: false },
+			9:  { success: 0.45,  failure: 0.55,   destroy: 0.000, failureDrops: false },
+			10: { success: 0.40,  failure: 0.60,   destroy: 0.000, failureDrops: false },
+			11: { success: 0.30,  failure: 0.686,  destroy: 0.014, failureDrops: true  },
+			12: { success: 0.25,  failure: 0.727,  destroy: 0.023, failureDrops: true  },
+			13: { success: 0.25,  failure: 0.72,   destroy: 0.030, failureDrops: true  },
+			14: { success: 0.20,  failure: 0.76,   destroy: 0.040, failureDrops: true  },
+			15: { success: 0.20,  failure: 0.7496, destroy: 0.0504,failureDrops: false },
+			16: { success: 0.20,  failure: 0.7496, destroy: 0.0504,failureDrops: true  },
+			17: { success: 0.20,  failure: 0.6368, destroy: 0.1632,failureDrops: true  },
+			18: { success: 0.15,  failure: 0.6868, destroy: 0.1632,failureDrops: true  },
+			19: { success: 0.15,  failure: 0.646,  destroy: 0.204, failureDrops: true  },
+			20: { success: 0.15,  failure: 0.598,  destroy: 0.252, failureDrops: false },
+			21: { success: 0.10,  failure: 0.594,  destroy: 0.306, failureDrops: true  },
+			22: { success: 0.10,  failure: 0.492,  destroy: 0.408, failureDrops: true  },
+			23: { success: 0.10,  failure: 0.468,  destroy: 0.432, failureDrops: true  },
+			24: { success: 0.10,  failure: 0.468,  destroy: 0.432, failureDrops: true  },
+			25: { success: 0.09,failure: 0.478, destroy: 0.432, failureDrops: true  },
+			26: { success: 0.07,failure: 0.4836,destroy: 0.4464,failureDrops: true  },
+			27: { success: 0.05,failure: 0.494, destroy: 0.456, failureDrops: true  },
+			28: { success: 0.03,failure: 0.5044,destroy: 0.4656,failureDrops: true  },
+			29: { success: 0.01,failure: 0.5148,destroy: 0.4752,failureDrops: true  }
+		}
+        };
+
+        let simulationInterval = null;
+        let simulationRunning = false;
+
+        function getCurrentProb(stars, maxStars) {
+            const original = probabilityTable[maxStars][stars];
+            const cloned = {...original};
+
+            // 周日模式
+            if(document.getElementById('sundayMode').checked) {
+                const specialStars = [5, 10, 15];
+                if(specialStars.includes(stars)) {
+                    cloned.success = 1;
+                    cloned.failure = 0;
+                    cloned.destroy = 0;
+                }
+            }
+
+            // 防爆模式
+            if(document.getElementById('antiExplode').checked && stars >= 12 && stars <= 16) {
+                cloned.failure += cloned.destroy;
+                cloned.destroy = 0;
+            }
+
+            return cloned;
+        }
+		
+        function stopSimulation() {
+            clearInterval(simulationInterval);
+            simulationRunning = false;
+            document.getElementById('startButton').disabled = false;
+            document.getElementById('stopButton').disabled = true;
+        }
+
+        // 事件监听
+        document.getElementById('maxStars').addEventListener('change', function() {
+            const max = parseInt(this.value);
+            document.getElementById('currentStars').max = max;
+            document.getElementById('targetStars').max = max;
+            document.getElementById('destroyedStars').max = max;
+        });
+
+        document.querySelectorAll('input[type="checkbox"], input[type="number"]').forEach(input => {
+            input.addEventListener('change', updateCurrentProbDisplay);
+        });
+
+        function updateCurrentProbDisplay() {
+            const currentStars = parseInt(document.getElementById('currentStars').value);
+            const maxStars = parseInt(document.getElementById('maxStars').value);
+            const prob = getCurrentProb(currentStars, maxStars);
+            updateProbabilityDisplay(prob, probabilityTable[maxStars][currentStars].failureDrops);
+        }
+
+        function updateProbabilityDisplay(prob, originalDrop) {
+            const format = num => `${(num * 100).toFixed(1)}%`;
+            
+            document.getElementById('currentSuccess').textContent = format(prob.success);
+            document.getElementById('currentFailure').textContent = format(prob.failure);
+            document.getElementById('currentDestroy').textContent = format(prob.destroy);
+            document.getElementById('currentDrop').textContent = 
+                document.getElementById('noDrop').checked ? '否' : (originalDrop ? '是' : '否');
+        }
+		
+        function startSimulation() {
+            if (simulationRunning) return;
+            
+            const config = {
+                maxStars: parseInt(document.getElementById('maxStars').value),
+                currentStars: Math.min(
+                    parseInt(document.getElementById('currentStars').value),
+                    parseInt(document.getElementById('maxStars').value)
+                ),
+                targetStars: parseInt(document.getElementById('targetStars').value) || 
+                           parseInt(document.getElementById('maxStars').value),
+                destroyedStars: Math.min(
+                    parseInt(document.getElementById('destroyedStars').value),
+                    parseInt(document.getElementById('maxStars').value)
+                )
+            };
+
+            let state = {
+                stars: config.currentStars,
+                attempts: 0,
+                destroys: 0,
+                histogram: {}
+            };
+
+            simulationRunning = true;
+            document.getElementById('startButton').disabled = true;
+            document.getElementById('stopButton').disabled = false;
+            const maxAttempts = 100000000;
+            
+            simulationInterval = setInterval(() => {
+                if (state.stars >= config.targetStars || state.attempts >= maxAttempts) {
+                    stopSimulation();
+                    return;
+                }
+                simulateStep(state, config);
+                updateResults(state);
+            }, 0.00001);
+        }
+
+        function simulateStep(state, config) {
+            state.attempts++;
+            const originalProb = probabilityTable[config.maxStars][state.stars];
+            let prob = getCurrentProb(state.stars, config.maxStars);
+
+            const rand = Math.random();
+            
+            if (rand < prob.success) {
+                state.stars++;
+            } else if (rand < prob.success + prob.failure) {
+                if (!document.getElementById('noDrop').checked && originalProb.failureDrops) {
+                    state.stars = Math.max(0, state.stars - 1);
+                }
+            } else {
+                state.stars = config.destroyedStars;
+                state.destroys++;
+            }
+
+            state.histogram[state.stars] = (state.histogram[state.stars] || 0) + 1;
+        }
+
+        function updateResults(state) {
+            document.getElementById('finalStars').textContent = state.stars;
+            document.getElementById('attempts').textContent = state.attempts.toLocaleString();
+            document.getElementById('destroys').textContent = state.destroys.toLocaleString();
+
+            const chart = document.getElementById('chart');
+            chart.innerHTML = '';
+            
+            const entries = Object.entries(state.histogram)
+                .sort((a, b) => b[0] - a[0]);
+            const maxCount = Math.max(...entries.map(e => e[1]), 1);
+            
+            entries.forEach(([stars, count]) => {
+                const container = document.createElement('div');
+                container.className = 'bar-container';
+                
+                const label = document.createElement('div');
+                label.className = 'bar-label';
+                label.innerHTML = `
+                    <div>${stars} 星</div>
+                    <div style="font-size: 0.9em; color: #666;">${count.toLocaleString()} 次</div>
+                `;
+                
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                const percentage = (count / state.attempts * 100).toFixed(1);
+                bar.style.width = `calc(${(count / maxCount * 100).toFixed(2)}% - 110px)`;
+                bar.textContent = `${percentage}%`;
+                
+                container.appendChild(label);
+                container.appendChild(bar);
+                chart.appendChild(container);
+            });
+        }
+		function renderProbabilityTable() {
+			const maxStars = parseInt(document.getElementById('maxStars').value);
+			const data = probabilityData[maxStars];
+			
+			let html = `
+				<table class="probability-table">
+					<tr>
+						<th style="width: 20%">强化阶段</th>
+						<th style="width: 20%">成功率</th>
+						<th style="width: 20%">失败率</th>
+						<th style="width: 20%">损坏率</th>
+						<th style="width: 20%">失败掉星</th>
+					</tr>
+			`;
+
+			data.forEach(item => {
+				html += `
+					<tr>
+						<td>${item.stars}</td>
+						<td class="success-rate">${item.success}%</td>
+						<td class="failure-rate">${item.failure}%</td>
+						<td class="destroy-rate">${item.destroy}%</td>
+						<td>${item.drops ? '✅' : '❌'}</td>
+					</tr>
+				`;
+			});
+
+			html += `</table>`;
+			document.getElementById('probabilityTable').innerHTML = html;
+		}
+
+		// 初始化事件监听
+		document.getElementById('maxStars').addEventListener('change', renderProbabilityTable);
+
+		// 初始渲染
+		renderProbabilityTable();
+        updateCurrentProbDisplay();
+    </script>
+</body>
+</html>
