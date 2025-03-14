@@ -10,102 +10,11 @@ var _hmt = _hmt || [];
 })();
 </script>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <meta charset="UTF-8">
     <title>冒险岛星之力强化模拟器</title>
 	
     <style>
-	/* 新增移动端样式 */
-    @media (max-width: 576px) {
-        .container {
-            padding: 15px;
-            margin: 10px auto;
-            border-radius: 8px;
-        }
-
-        h1 {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-        }
-
-        .control-panel {
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
-
-        .control-group {
-            padding: 15px;
-        }
-
-        .button-group {
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            font-size: 14px;
-        }
-
-        .results-panel {
-            grid-template-columns: 1fr;
-            gap: 20px;
-        }
-
-        .stat-item {
-            font-size: 16px;
-            padding: 10px;
-        }
-
-        .stat-value {
-            font-size: 1.1em;
-        }
-
-        .bar {
-            height: 28px;
-            font-size: 14px;
-            padding: 0 10px;
-        }
-
-        .bar-label {
-            width: 80px;
-            font-size: 14px;
-        }
-
-        /* 概率表优化 */
-        .probability-table {
-            font-size: 14px;
-        }
-
-        .probability-table th,
-        .probability-table td {
-            padding: 12px 8px;
-            min-width: 80px;
-        }
-
-        /* 输入框优化 */
-        input[type="number"] {
-            font-size: 14px;
-            padding: 8px;
-        }
-    }
-
-    /* 中等屏幕适配 */
-    @media (max-width: 768px) {
-        .container {
-            max-width: 95%;
-        }
-
-        .probability-table th,
-        .probability-table td {
-            padding: 14px 10px;
-        }
-
-        .stat-item {
-            font-size: 16px;
-        }
-    }
 			.probability-table {
 			width: 100%;
 			border-collapse: collapse;
@@ -325,7 +234,7 @@ var _hmt = _hmt || [];
 <h5 class="text-center mb-4">
         
         <div class="control-panel">
-            <div class="control-group mobile-stack">
+            <div class="control-group">
                 <label>⚙️ 强化规则</label>
                 <div style="display: grid; gap: 15px;">
                     <div>
@@ -396,7 +305,7 @@ var _hmt = _hmt || [];
             </div>
         </div>
     </div>
-	<div class="control-group mobile-stack">
+	<div class="control-group">
 				<label>📜 星之力概率表</label>
 				<div id="probabilityTable" style="margin-top: 10px;"></div>
 			</div>
