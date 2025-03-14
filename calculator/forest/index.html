@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh">
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?b52ffcdf33a045f844b6558bb382a915";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<head>
+    <meta charset="UTF-8">
+    <title>魔女森林抽奖</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* 新增样式 */
+        .rare-options {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #6272a4;
+            border-radius: 5px;
+        }
+        .rare-options label {
+            margin-right: 15px;
+            cursor: pointer;
+        }
+        .drawing-status {
+            color: #50fa7b;
+            margin: 10px 0;
+            display: none;
+        }
+        /* 保持原有样式不变 */
+        body { background: #2a0f47; color: #fff; font-family: Arial; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .section { background: rgba(40, 40, 40, 0.9); border: 1px solid #6272a4; border-radius: 10px; padding: 20px; margin: 10px; }
+        .flex-row { display: flex; gap: 20px; flex-wrap: wrap; }
+        input { background: #44475a; border: 1px solid #6272a4; color: #fff; padding: 5px; margin: 5px; width: 100px; }
+        button { background: #6272a4; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #50fa7b; color: #000; }
+        .history-list { height: 200px; overflow-y: auto; border: 1px solid #6272a4; padding: 10px; }
+        .premium-item { color: #ffb86c; }
+        .ss-item { color: #ff5555; animation: glow 1s infinite alternate; }
+        @keyframes glow { from { text-shadow: 0 0 5px #ff5555; } to { text-shadow: 0 0 20px #ff5555; } }
+        #progressBar { width: 100%; height: 20px; background: #44475a; border-radius: 10px; overflow: hidden; }
+        #progressFill { height: 100%; transition: 0.3s; background: linear-gradient(90deg, #ff0000, #00ff00); }
+        .reset-btn { background: #ff5555 !important; margin-top: 10px; }
+        .reset-btn:hover { background: #ff0000 !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; color: #ff79c6;">🎃 魔女森林模拟抽奖 🍄</h1>
+        <h4 style="text-align: center; margin-bottom: 5px;">    by 紫电NS 
+    <a href="https://photonrain.github.io/" class="ms-3" style="color: #3498db; text-decoration: none;">网站首页</a>
+        <div class="flex-row">
+            <div class="section">
+                <h3>道具价格设置</h3>
+                A: <input type="number" id="priceA" value="10"><br>
+                A+: <input type="number" id="priceAplus" value="20"><br>
+                AA: <input type="number" id="priceAA" value="50"><br>
+                S: <input type="number" id="priceS" value="1000"><br>
+                SS: <input type="number" id="priceSS" value="8000">
+            </div>
+
+            <div class="section">
+                <h3>抽奖设置</h3>
+                单次价格: <input type="number" id="cost" value="50"><br>
+                
+                <div class="rare-options">
+				
+                    <label><input type="radio" name="rare" value="S" checked> 抽到S停</label>
+                    <label><input type="radio" name="rare" value="SS"> 抽到SS停</label>
+                    <label><input type="radio" name="rare" value="both"> 抽到S或SS停</label>
+                </div>
+                
+                <button onclick="draw(1)">🔮 单抽</button>
+                <button onclick="draw(10)">🌟 十连抽</button>
+                <button onclick="draw(100)">✨ 百连抽</button>
+                <button onclick="startConditionalDraw()">💫 抽到指定稀有度</button>
+                <button class="reset-btn" onclick="resetAll()">🔄 重置数据</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>收益统计</h3>
+            <div id="progressBar">
+                <div id="progressFill" style="width: 50%"></div>
+            </div>
+            <div id="profitText">当前收益: 0 金币</div>
+            <div class="drawing-status" id="drawingStatus"></div>
+        </div>
+
+        <!-- 保持其他区块不变 -->
+        <div class="flex-row">
+            <div class="section" style="flex:2">
+                <h3>抽奖记录</h3>
+                <div class="history-list" id="history"></div>
+            </div>
+            <div class="section" style="flex:1">
+                <h3>高级道具</h3>
+                <div class="history-list" id="premiumHistory"></div>
+            </div>
+        </div>
+        <div class="section">
+            <h3>道具分布</h3>
+            <canvas id="chart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        let profit = 0;
+        let history = [];
+        let premiumHistory = [];
+        let distribution = { A:0, Aplus:0, AA:0, S:0, SS:0 };
+        let chart = null;
+        let isDrawing = false;
+
+        const probabilities = [
+            { type: 'A', prob: 68.88 },
+            { type: 'Aplus', prob: 23.8 },
+            { type: 'AA', prob: 6.05 },
+            { type: 'S', prob: 0.21 },
+            { type: 'SS', prob: 0.06 },
+        ];
+
+        function getSelectedCondition() {
+            const selected = document.querySelector('input[name="rare"]:checked').value;
+            return {
+                'S': (r) => r === 'S',
+                'SS': (r) => r === 'SS',
+                'both': (r) => r === 'S' || r === 'SS'
+            }[selected];
+        }
+
+        function singleDraw() {
+            const rand = Math.random() * 100;
+            let cumulative = 0;
+            let result = 'A';
+            
+            for(const {type, prob} of probabilities) {
+                cumulative += prob;
+                if(rand <= cumulative) {
+                    result = type;
+                    break;
+                }
+            }
+            
+            const value = getPrice(result);
+            const cost = parseInt(document.getElementById('cost').value);
+            
+            distribution[result]++;
+            history.unshift(`${result} (+${value})`);
+            if(result === 'S' || result === 'SS') {
+                premiumHistory.unshift(`⭐ ${result} (+${value})`);
+            }
+            
+            profit += value - cost;
+            return result;
+        }
+
+        async function startConditionalDraw() {
+            if(isDrawing) return;
+            isDrawing = true;
+            const condition = getSelectedCondition();
+            const statusElement = document.getElementById('drawingStatus');
+            let count = 0;
+            const maxAttempts = 5000;
+            
+            statusElement.style.display = 'block';
+            statusElement.textContent = "准备抽奖...";
+            
+            while(count < maxAttempts) {
+                count++;
+                const result = singleDraw();
+                
+                if(condition(result)) {
+                    statusElement.innerHTML = `🎉 在第 ${count} 次抽中 ${result}！`;
+                    break;
+                }
+                
+                // 定期更新界面
+                if(count % 50 === 0) {
+                    statusElement.textContent = `已尝试 ${count} 次...`;
+                    await new Promise(resolve => setTimeout(resolve, 0));
+                    updateUI();
+                }
+            }
+            
+            if(count >= maxAttempts) {
+                statusElement.innerHTML = "⚠️ 已达到安全限制（5000次）仍未抽中";
+            }
+            
+            updateUI();
+            isDrawing = false;
+        }
+
+        // 保持其他函数不变
+        function getPrice(type) {
+            return parseInt(document.getElementById(`price${type}`).value);
+        }
+
+        function resetAll() {
+            profit = 0;
+            history = [];
+            premiumHistory = [];
+            distribution = { A:0, Aplus:0, AA:0, S:0, SS:0 };
+            document.getElementById('priceA').value = 10;
+            document.getElementById('priceAplus').value = 20;
+            document.getElementById('priceAA').value = 50;
+            document.getElementById('priceS').value = 1000;
+            document.getElementById('priceSS').value = 8000;
+            document.getElementById('cost').value = 50;
+            updateUI();
+        }
+
+        function draw(times) {
+            const cost = parseInt(document.getElementById('cost').value) * times;
+            let totalGain = 0;
+            
+            for(let i=0; i<times; i++) {
+                const result = singleDraw();
+                totalGain += getPrice(result);
+            }
+            
+            profit += totalGain - cost;
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('profitText').innerHTML = 
+                `当前收益: ${profit} 金币 ${profit>=0?'↑':'↓'}`;
+            document.getElementById('progressFill').style.width = 
+                `${Math.min(100, 50 + profit/100)}%`;
+
+            document.getElementById('history').innerHTML = 
+                history.slice(0,10).map(item => `<div>${item}</div>`).join('');
+            document.getElementById('premiumHistory').innerHTML = 
+                premiumHistory.slice(0,10).map(item => 
+                    `<div class="${item.includes('SS')?'ss-item':'premium-item'}">${item}</div>`
+                ).join('');
+
+            if(chart) chart.destroy();
+            const ctx = document.getElementById('chart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(distribution),
+                    datasets: [{
+                        data: Object.values(distribution),
+                        backgroundColor: ['#6272a4', '#50fa7b', '#bd93f9', '#ffb86c', '#ff5555']
+                    }]
+                }
+            });
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>
