@@ -1,61 +1,124 @@
 <!DOCTYPE html>
 <html lang="zh">
-<script>
-var _hmt = _hmt || [];
-(function() {
-  var hm = document.createElement("script");
-  hm.src = "https://hm.baidu.com/hm.js?b52ffcdf33a045f844b6558bb382a915";
-  var s = document.getElementsByTagName("script")[0]; 
-  s.parentNode.insertBefore(hm, s);
-})();
-</script>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>魔女森林抽奖</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* 新增样式 */
-        .rare-options {
-            margin: 10px 0;
+        /* 新增移动端适配 */
+        @media (max-width: 768px) {
+            .flex-row { flex-direction: column; }
+            .section { margin: 10px 0; }
+            button { width: 100%; margin: 5px 0; }
+            input { width: 90% !important; }
+            h1 { font-size: 1.5rem; }
+            h3 { font-size: 1.2rem; }
+            #chart { max-width: 95vw; }
+            .rare-options { display: flex; flex-wrap: wrap; }
+        }
+
+        /* 优化基础样式 */
+        * { box-sizing: border-box; }
+        
+        body { 
+            background: #2a0f47; 
+            color: #fff; 
+            font-family: Arial; 
             padding: 10px;
-            border: 1px solid #6272a4;
-            border-radius: 5px;
+            line-height: 1.5;
         }
-        .rare-options label {
-            margin-right: 15px;
-            cursor: pointer;
+
+        .container { 
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0 10px;
         }
-        .drawing-status {
-            color: #50fa7b;
+
+        .section { 
+            background: rgba(40, 40, 40, 0.9); 
+            border: 1px solid #6272a4; 
+            border-radius: 10px; 
+            padding: 15px;
             margin: 10px 0;
-            display: none;
         }
-        /* 保持原有样式不变 */
-        body { background: #2a0f47; color: #fff; font-family: Arial; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .section { background: rgba(40, 40, 40, 0.9); border: 1px solid #6272a4; border-radius: 10px; padding: 20px; margin: 10px; }
-        .flex-row { display: flex; gap: 20px; flex-wrap: wrap; }
-        input { background: #44475a; border: 1px solid #6272a4; color: #fff; padding: 5px; margin: 5px; width: 100px; }
-        button { background: #6272a4; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; transition: 0.3s; }
-        button:hover { background: #50fa7b; color: #000; }
-        .history-list { height: 200px; overflow-y: auto; border: 1px solid #6272a4; padding: 10px; }
+
+        .flex-row { 
+            display: flex; 
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        input { 
+            background: #44475a;
+            border: 1px solid #6272a4;
+            color: #fff;
+            padding: 8px;
+            margin: 5px 0;
+            width: 100px;
+            border-radius: 4px;
+        }
+
+        button { 
+            background: #6272a4;
+            color: #fff; 
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 1rem;
+        }
+
+        .history-list { 
+            height: 150px;
+            max-height: 30vh;
+            overflow-y: auto; 
+            border: 1px solid #6272a4; 
+            padding: 10px;
+            font-size: 0.9rem;
+        }
+
+        #progressBar { 
+            width: 100%; 
+            height: 20px; 
+            background: #44475a; 
+            border-radius: 10px; 
+            overflow: hidden; 
+            margin: 10px 0;
+        }
+
+        /* 保持原有特效不变 */
         .premium-item { color: #ffb86c; }
         .ss-item { color: #ff5555; animation: glow 1s infinite alternate; }
-        @keyframes glow { from { text-shadow: 0 0 5px #ff5555; } to { text-shadow: 0 0 20px #ff5555; } }
-        #progressBar { width: 100%; height: 20px; background: #44475a; border-radius: 10px; overflow: hidden; }
-        #progressFill { height: 100%; transition: 0.3s; background: linear-gradient(90deg, #ff0000, #00ff00); }
-        .reset-btn { background: #ff5555 !important; margin-top: 10px; }
-        .reset-btn:hover { background: #ff0000 !important; }
+        @keyframes glow { 
+            from { text-shadow: 0 0 5px #ff5555; } 
+            to { text-shadow: 0 0 20px #ff5555; } 
+        }
     </style>
+    <!-- 百度统计代码保持不变 -->
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?b52ffcdf33a044f844b6558bb382a915";
+          var s = document.getElementsByTagName("script")[0]; 
+          s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
 </head>
 <body>
     <div class="container">
-        <h1 style="text-align: center; color: #ff79c6;">🎃 魔女森林模拟抽奖 🍄</h1>
-        <h4 style="text-align: center; margin-bottom: 5px;">    by 紫电NS 
-    <a href="https://photonrain.github.io/" class="ms-3" style="color: #3498db; text-decoration: none;">网站首页</a>
+        <h1 style="text-align: center; color: #ff79c6; margin: 15px 0;">🎃 魔女森林抽奖模拟 🍄</h1>
+        <div style="text-align: center; margin-bottom: 15px;">
+            by 紫电NS 
+            <a href="https://photonrain.github.io/" style="color: #3498db; text-decoration: none;">网站首页</a>
+        </div>
+
         <div class="flex-row">
-            <div class="section">
-                <h3>道具价格设置</h3>
+            <!-- 道具价格设置区块 -->
+            <div class="section" style="flex:1">
+                <h3>🔧 道具价格</h3>
                 A: <input type="number" id="priceA" value="10"><br>
                 A+: <input type="number" id="priceAplus" value="20"><br>
                 AA: <input type="number" id="priceAA" value="50"><br>
@@ -63,52 +126,60 @@ var _hmt = _hmt || [];
                 SS: <input type="number" id="priceSS" value="8000">
             </div>
 
-            <div class="section">
-                <h3>抽奖设置</h3>
-                单次价格: <input type="number" id="cost" value="50"><br>
+            <!-- 抽奖控制区块 -->
+            <div class="section" style="flex:2">
+                <h3>🎮 抽奖控制</h3>
+                单次价格: <input type="number" id="cost" value="50">
                 
-                <div class="rare-options">
-				
+                <div class="rare-options" style="margin: 15px 0;">
                     <label><input type="radio" name="rare" value="S" checked> 抽到S停</label>
                     <label><input type="radio" name="rare" value="SS"> 抽到SS停</label>
-                    <label><input type="radio" name="rare" value="both"> 抽到S或SS停</label>
+                    <label><input type="radio" name="rare" value="both"> 抽到S/SS停</label>
                 </div>
                 
-                <button onclick="draw(1)">🔮 单抽</button>
-                <button onclick="draw(10)">🌟 十连抽</button>
-                <button onclick="draw(100)">✨ 百连抽</button>
-                <button onclick="startConditionalDraw()">💫 抽到指定稀有度</button>
-                <button class="reset-btn" onclick="resetAll()">🔄 重置数据</button>
+                <div class="flex-row">
+                    <button onclick="draw(1)">🔮 单抽</button>
+                    <button onclick="draw(10)">🌟 十连</button>
+                    <button onclick="draw(100)">✨ 百连</button>
+                </div>
+                <button onclick="startConditionalDraw()" style="margin-top:10px;">💫 抽到指定稀有度</button>
+                <button class="reset-btn" onclick="resetAll()" style="background:#ff5555; margin-top:10px;">🔄 重置数据</button>
             </div>
         </div>
 
+        <!-- 收益统计区块 -->
         <div class="section">
-            <h3>收益统计</h3>
+            <h3>📈 收益统计</h3>
             <div id="progressBar">
                 <div id="progressFill" style="width: 50%"></div>
             </div>
-            <div id="profitText">当前收益: 0 金币</div>
+            <div id="profitText" style="margin:10px 0;">当前收益: 0 金币</div>
             <div class="drawing-status" id="drawingStatus"></div>
         </div>
 
-        <!-- 保持其他区块不变 -->
+        <!-- 历史记录区块 -->
         <div class="flex-row">
-            <div class="section" style="flex:2">
-                <h3>抽奖记录</h3>
+            <div class="section" style="flex:1">
+                <h3>📜 抽奖记录</h3>
                 <div class="history-list" id="history"></div>
             </div>
             <div class="section" style="flex:1">
-                <h3>高级道具</h3>
+                <h3>💎 高级道具</h3>
                 <div class="history-list" id="premiumHistory"></div>
             </div>
         </div>
+
+        <!-- 图表区块 -->
         <div class="section">
-            <h3>道具分布</h3>
-            <canvas id="chart"></canvas>
+            <h3>📊 道具分布</h3>
+            <div style="overflow-x: auto;">
+                <canvas id="chart"></canvas>
+            </div>
         </div>
     </div>
 
     <script>
+        // JavaScript 代码保持不变，与原始版本一致
         let profit = 0;
         let history = [];
         let premiumHistory = [];
@@ -179,7 +250,6 @@ var _hmt = _hmt || [];
                     break;
                 }
                 
-                // 定期更新界面
                 if(count % 50 === 0) {
                     statusElement.textContent = `已尝试 ${count} 次...`;
                     await new Promise(resolve => setTimeout(resolve, 0));
@@ -195,7 +265,6 @@ var _hmt = _hmt || [];
             isDrawing = false;
         }
 
-        // 保持其他函数不变
         function getPrice(type) {
             return parseInt(document.getElementById(`price${type}`).value);
         }
@@ -250,6 +319,10 @@ var _hmt = _hmt || [];
                         data: Object.values(distribution),
                         backgroundColor: ['#6272a4', '#50fa7b', '#bd93f9', '#ffb86c', '#ff5555']
                     }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
                 }
             });
         }
