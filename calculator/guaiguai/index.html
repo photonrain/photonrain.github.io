@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?b52ffcdf33a045f844b6558bb382a915";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<head>
+    <meta charset="UTF-8">
+    <title>冒险岛怪怪卡模拟器</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a8a5e6;
+            --success: #00b894;
+            --danger: #ff7675;
+            --warning: #f9c74f;
+            --background: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: var(--background);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary);
+        }
+
+        .control-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        select, input {
+            padding: 10px;
+            border: 2px solid var(--secondary);
+            border-radius: 8px;
+            background: white;
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .combination-table tr:nth-child(odd) {
+            background: #f8f9ff;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+
+        .probability-table {
+            margin-top: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎴 冒险岛怪怪卡模拟器</h1>
+        <h4 style="text-align: center; margin-bottom: 5px;">    by 紫电NS
+            <a href="https://photonrain.github.io/" class="ms-3" style="color: #3498db; text-decoration: none;">网站首页</a>
+        <h4 style="text-align: center; margin-bottom: 5px;">    品质概率统计了300余次抽卡结果得到 
+    
+        
+    </div>
+
+    <div class="control-panel">
+        <div class="controls">
+            <button class="btn-primary" onclick="draw(1)">✨ 单抽</button>
+            <button class="btn-primary" onclick="draw(10)">🎁 十连抽</button>
+            <button class="btn-primary" onclick="draw(100)">🎉 百连抽</button>
+            <button class="btn-warning" id="fastModeBtn" onclick="toggleFastMode()">🚀 极速模式</button>
+            <select id="targetType">
+                <option value="any">任意类型</option>
+                <option value="普通">普通</option>
+                <option value="特殊">特殊</option>
+                <option value="傲天">傲天</option>
+            </select>
+            <select id="targetQuality">
+                <option value="any">任意品质</option>
+                <option value="B">B级</option>
+                <option value="A">A级</option>
+                <option value="S">S级</option>
+                <option value="SS">SS级</option>
+            </select>
+            <button class="btn-primary" onclick="startTargetDraw()">🎯 抽到目标</button>
+            <button class="btn-danger" onclick="stopDrawing()">⏹ 停止</button>
+            <button class="btn-danger" onclick="resetData()">🔄 重置</button>
+            <input type="number" id="costPerDraw" value="1000" placeholder="单抽价格">
+        </div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div>总抽取次数</div>
+                <div class="stat-value" id="totalDraws">0</div>
+            </div>
+            <div class="stat-box">
+                <div>消耗金币</div>
+                <div class="stat-value" id="totalCost">0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="results">
+        <div class="card">
+            <h3>📝 最近抽取记录 (最新10条)</h3>
+            <table id="recentResults">
+                <tr><th>类型</th><th>品质</th><th>时间</th></tr>
+            </table>
+        </div>
+        <div class="card">
+            <h3>📊 组合统计表</h3>
+            <table class="combination-table">
+                <tr><th>类型</th><th>品质</th><th>出现次数</th></tr>
+                <!-- 普通系列 -->
+                <tr id="普通B"><td>普通</td><td>B</td><td>0</td></tr>
+                <tr id="普通A"><td>普通</td><td>A</td><td>0</td></tr>
+                <tr id="普通S"><td>普通</td><td>S</td><td>0</td></tr>
+                <tr id="普通SS"><td>普通</td><td>SS</td><td>0</td></tr>
+                <!-- 特殊系列 -->
+                <tr id="特殊B"><td>特殊</td><td>B</td><td>0</td></tr>
+                <tr id="特殊A"><td>特殊</td><td>A</td><td>0</td></tr>
+                <tr id="特殊S"><td>特殊</td><td>S</td><td>0</td></tr>
+                <tr id="特殊SS"><td>特殊</td><td>SS</td><td>0</td></tr>
+                <!-- 傲天系列 -->
+                <tr id="傲天B"><td>傲天</td><td>B</td><td>0</td></tr>
+                <tr id="傲天A"><td>傲天</td><td>A</td><td>0</td></tr>
+                <tr id="傲天S"><td>傲天</td><td>S</td><td>0</td></tr>
+                <tr id="傲天SS"><td>傲天</td><td>SS</td><td>0</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="probability-table">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+            <div>
+                <h3>🔖 类型概率表</h3>
+                <table>
+                    <tr><th>类型</th><th>概率</th></tr>
+                    <tr><td>普通怪怪</td><td>98.794%</td></tr>
+                    <tr><td>特殊怪怪</td><td>1.2%</td></tr>
+                    <tr><td>傲天怪怪</td><td>0.006%</td></tr>
+                </table>
+            </div>
+            <div>
+                <h3>🏷️ 品质概率表</h3>
+                <table>
+                    <tr><th>品质</th><th>概率</th></tr>
+                    <tr><td>B</td><td>40.6349%</td></tr>
+                    <tr><td>A</td><td>51.746%</td></tr>
+                    <tr><td>S</td><td>6.6667%</td></tr>
+                    <tr><td>SS</td><td>0.9524%</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isDrawing = false;
+        let totalDraws = 0;
+        let isFastMode = false;
+        let costPerDraw = 1000;
+        let allResults = [];
+
+        const combinationStats = {
+            '普通B': { count: 0 },
+            '普通A': { count: 0 },
+            '普通S': { count: 0 },
+            '普通SS': { count: 0 },
+            '特殊B': { count: 0 },
+            '特殊A': { count: 0 },
+            '特殊S': { count: 0 },
+            '特殊SS': { count: 0 },
+            '傲天B': { count: 0 },
+            '傲天A': { count: 0 },
+            '傲天S': { count: 0 },
+            '傲天SS': { count: 0 }
+        };
+
+        function getRandomType() {
+            const rand = Math.random() * 100;
+            if (rand < 98.794) return '普通';
+            if (rand < 98.794 + 1.2) return '特殊';
+            return '傲天';
+        }
+
+        function getRandomQuality() {
+            const rand = Math.random() * 100;
+            if (rand < 40.6349) return 'B';
+            if (rand < 40.6349 + 51.746) return 'A';
+            if (rand < 40.6349 + 51.746 + 6.6667) return 'S';
+            return 'SS';
+        }
+
+        function toggleFastMode() {
+            isFastMode = !isFastMode;
+            const btn = document.getElementById('fastModeBtn');
+            btn.style.backgroundColor = isFastMode ? '#f9844a' : '#f9c74f';
+            btn.textContent = isFastMode ? '🚀 极速模式(ON)' : '🚀 极速模式';
+        }
+
+        function updateStats() {
+            document.getElementById('totalDraws').textContent = totalDraws;
+            document.getElementById('totalCost').textContent = (totalDraws * costPerDraw).toLocaleString();
+        }
+
+        function updateRecentTable() {
+            const tbody = allResults.map(r => `
+                <tr>
+                    <td>${r.type}</td>
+                    <td>${r.quality}</td>
+                    <td>${r.time}</td>
+                </tr>
+            `).join('');
+            document.getElementById('recentResults').innerHTML = `
+                <tr><th>类型</th><th>品质</th><th>时间</th></tr>
+                ${tbody}
+            `;
+        }
+
+        function updateCombinationStats(comboKey) {
+            const row = document.getElementById(comboKey);
+            if (row) {
+                row.cells[2].textContent = combinationStats[comboKey].count;
+            }
+        }
+
+        function addResult(result) {
+            totalDraws++;
+            costPerDraw = parseInt(document.getElementById('costPerDraw').value) || 0;
+            
+            // 更新组合统计
+            const comboKey = `${result.type}${result.quality}`;
+            combinationStats[comboKey].count++;
+            updateCombinationStats(comboKey);
+            
+            // 更新最近记录
+            allResults.unshift({
+                ...result,
+                time: new Date().toLocaleTimeString()
+            });
+            if (allResults.length > 10) allResults.pop();
+            updateRecentTable();
+            updateStats();
+        }
+
+        async function draw(count) {
+            isDrawing = true;
+            const delay = isFastMode ? 0 : 30;
+
+            for (let i = 0; i < count && isDrawing; i++) {
+                const result = {
+                    type: getRandomType(),
+                    quality: getRandomQuality()
+                };
+                addResult(result);
+                
+                if (!isFastMode) await new Promise(r => setTimeout(r, delay));
+                else if (i % 10 === 0) await new Promise(r => setTimeout(r, 0));
+            }
+            isDrawing = false;
+        }
+
+        async function startTargetDraw() {
+            isDrawing = true;
+            const targetType = document.getElementById('targetType').value;
+            const targetQuality = document.getElementById('targetQuality').value;
+            const delay = isFastMode ? 0 : 30;
+
+            while(isDrawing) {
+                const result = {
+                    type: getRandomType(),
+                    quality: getRandomQuality()
+                };
+                
+                addResult(result);
+
+                const typeMatch = targetType === 'any' || result.type === targetType;
+                const qualityMatch = targetQuality === 'any' || result.quality === targetQuality;
+                
+                if (typeMatch && qualityMatch) {
+                    isDrawing = false;
+                    alert(`🎉 成功在第${totalDraws}抽获得目标！\n类型：${result.type}\n品质：${result.quality}`);
+                    break;
+                }
+                
+                await new Promise(r => setTimeout(r, delay));
+            }
+            isDrawing = false;
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function resetData() {
+            isDrawing = false;
+            totalDraws = 0;
+            allResults = [];
+            document.getElementById('costPerDraw').value = '1000';
+            
+            // 重置组合统计数据
+            Object.keys(combinationStats).forEach(key => {
+                combinationStats[key].count = 0;
+                updateCombinationStats(key);
+            });
+            
+            updateRecentTable();
+            updateStats();
+        }
+    </script>
+</body>
+</html>
