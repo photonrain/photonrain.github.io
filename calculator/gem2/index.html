@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>冒险岛宝玉研磨模拟器</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 20px; min-height: 100vh; }
+        .container { display: flex; gap: 20px; max-width: 1400px; margin: 0 auto; }
+        .panel { flex: 1; background: white; border-radius: 15px; padding: 25px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); }
+        h1 { color: #2c3e50; margin-bottom: 20px; text-align: center; font-size: 2em; }
+        h2 { color: #2c3e50; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .input-group { margin: 15px 0; }
+        label { display: block; margin-bottom: 8px; color: #34495e; font-weight: bold; }
+        input, select, button { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; }
+        button { background: #3498db; color: white; border: none; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        button:hover { background: #2980b9; transform: translateY(-2px); }
+        .results { margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px; }
+        .chart-container { width: 100%; margin: 20px 0; }
+        .level-columns { display: flex; justify-content: space-between; gap: 20px; margin: 10px 0; }
+        .level-column { flex: 1; }
+        .level-box { padding: 10px; background: #ecf0f1; border-radius: 5px; text-align: center; margin-bottom: 10px; }
+        .current-levels select { width: 80px; }
+        .icon { width: 20px; height: 20px; vertical-align: middle; }
+        .stats { margin-bottom: 15px; font-size: 1.1em; color: #2c3e50; }
+    </style>
+</head>
+<body>
+    <h1>冒险岛宝玉研磨模拟器</h1>
+	<h4 style="text-align: center; margin-bottom: 5px;">    by 紫电NS
+            <a href="https://photonrain.github.io/" class="ms-3" style="color: #3498db; text-decoration: none;">网站首页</a>
+            <a href="https://photonrain.github.io/gem2" class="ms-3" style="color: #3498db; text-decoration: none;">宝玉加工模拟</a>   
+    <div class="container">
+        <!-- 左边面板：模拟统计 -->
+        <div class="panel">
+            <h2>
+                <svg class="icon" viewBox="0 0 24 24" fill="#3498db">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5v-2L12 20 2 15v2z"/>
+                </svg>
+                研磨概率模拟
+            </h2>
+            <div class="input-group">
+                <label>当前研磨等级 (1-10):</label>
+                <select id="grindLevel">
+                    <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                    <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                    <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                    <option value="10" selected>10</option>
+                </select>
+                <label>追加等级 (0-10):</label>
+                <select id="appendLevel">
+                    <option value="0" selected>0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                    <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                    <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                    <option value="10">10</option>
+                </select>
+                <label>模拟次数:</label>
+                <input type="number" id="simCount" value="10000" min="100" max="1000000">
+                <button onclick="runSimulation()">
+                    <svg class="icon" viewBox="0 0 24 24" fill="white">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    开始模拟
+                </button>
+            </div>
+            <div class="results" id="simResults">
+                <div class="stats" id="simStats"></div>
+                <div class="chart-container">
+                    <canvas id="distChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="cumChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右边面板：当前状态分析 -->
+        <div class="panel">
+            <h2>
+                <svg class="icon" viewBox="0 0 24 24" fill="#3498db">
+                    <path d="M12 4a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z"/>
+                </svg>
+                当前状态分析
+            </h2>
+            <div class="input-group">
+                <label>当前研磨等级 (1-10):</label>
+                <select id="currentGrindLevel">
+                    <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                    <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                    <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                    <option value="10" selected>10</option>
+                </select>
+                <label>追加等级 (0-10):</label>
+                <select id="currentAppendLevel">
+                    <option value="0" selected>0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                    <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                    <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                    <option value="10">10</option>
+                </select>
+                <label>请输入当前各等级加成:</label>
+                <div class="level-columns">
+                    <div class="level-column" id="column1"></div>
+                    <div class="level-column" id="column2"></div>
+                </div>
+                <button onclick="analyzeCurrent()">分析当前状态</button>
+            </div>
+            <div class="results" id="analysisResults"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const probData = {
+            1: { probs: { 25: 0.65, 50: 0.05, 75: 0.1, 100: 0.2 }, multiplier: 3 },
+            2: { probs: { 25: 0.65, 50: 0.05, 75: 0.1, 100: 0.2 }, multiplier: 3 },
+            3: { probs: { 25: 0.65, 50: 0.05, 75: 0.1, 100: 0.2 }, multiplier: 3 },
+            4: { probs: { 25: 0.7, 50: 0.06, 75: 0.09, 100: 0.15 }, multiplier: 3 },
+            5: { probs: { 25: 0.7, 50: 0.06, 75: 0.09, 100: 0.15 }, multiplier: 3 },
+            6: { probs: { 50: 0.75, 100: 0.07, 150: 0.08, 200: 0.1 }, multiplier: 4 },
+            7: { probs: { 50: 0.75, 100: 0.07, 150: 0.08, 200: 0.1 }, multiplier: 4 },
+            8: { probs: { 50: 0.8, 100: 0.08, 150: 0.07, 200: 0.05 }, multiplier: 4 },
+            9: { probs: { 50: 0.8, 100: 0.08, 150: 0.07, 200: 0.05 }, multiplier: 4 },
+            10: { probs: { 50: 0.85, 100: 0.09, 150: 0.04, 200: 0.02 }, multiplier: 4 }
+        };
+
+        let distChart, cumChart;
+
+        function simulateOne(maxLevel, appendLevel) {
+			const results = [];
+			for (let level = 1; level <= maxLevel; level++) {
+				const levelData = probData[level];
+				const rand = Math.random();
+				let cumProb = 0;
+				let base = 0;
+				
+				for (const [value, prob] of Object.entries(levelData.probs)) {
+					cumProb += prob;
+					if (rand <= cumProb) {
+						base = parseInt(value);
+						break;
+					}
+				}
+				
+				// 只有在追加等级范围内的才使用倍率
+				const multiplier = (level <= appendLevel) ? levelData.multiplier : 1;
+				const final = base * multiplier;
+				
+				results.push({ base, final });
+			}
+			return results;
+		}
+
+        function runSimulation() {
+            const maxLevel = parseInt(document.getElementById('grindLevel').value);
+            const appendLevel = parseInt(document.getElementById('appendLevel').value);
+            const simCount = parseInt(document.getElementById('simCount').value);
+
+            const totals = [];
+            for (let i = 0; i < simCount; i++) {
+                const sim = simulateOne(maxLevel, appendLevel);
+                const total = sim.reduce((sum, r) => sum + r.final, 0);
+                totals.push(total);
+            }
+
+            totals.sort((a, b) => a - b);
+            const minTotal = totals[0];
+            const maxTotal = totals[totals.length - 1];
+            const avgTotal = totals.reduce((sum, val) => sum + val, 0) / simCount;
+            const medianTotal = totals[Math.floor(simCount / 2)];
+
+            const step = (maxTotal - minTotal) / 50;
+            const dist = {};
+            totals.forEach(total => {
+                const key = Math.floor(total / step) * step;
+                dist[key] = (dist[key] || 0) + 1;
+            });
+            const labels = Object.keys(dist).map(Number).sort((a, b) => a - b);
+            const distValues = labels.map(key => (dist[key] / simCount * 100).toFixed(2));
+            const cumValues = labels.map((_, i) => {
+                return (totals.filter(t => t <= labels[i]).length / simCount * 100).toFixed(2);
+            });
+
+            let statsOutput = `<p>模拟次数: ${simCount}</p>`;
+            statsOutput += `<p>最低总属性: ${minTotal}</p>`;
+            statsOutput += `<p>最高总属性: ${maxTotal}</p>`;
+            statsOutput += `<p>平均总属性: ${avgTotal.toFixed(2)}</p>`;
+            statsOutput += `<p>中位数总属性: ${medianTotal}</p>`;
+            document.getElementById('simStats').innerHTML = statsOutput;
+
+            if (distChart) distChart.destroy();
+            if (cumChart) cumChart.destroy();
+
+            distChart = new Chart(document.getElementById('distChart'), {
+                type: 'bar',
+                data: { labels, datasets: [{ label: '总属性分布 (%)', data: distValues, backgroundColor: 'rgba(52, 152, 219, 0.7)', borderColor: 'rgba(52, 152, 219, 1)', borderWidth: 1 }] },
+                options: { plugins: { title: { display: true, text: `总属性分布 (${simCount}次模拟, ${maxLevel}级)` } }, scales: { y: { beginAtZero: true, title: { display: true, text: '百分比 (%)' } }, x: { title: { display: true, text: '总属性值' } } } }
+            });
+
+            cumChart = new Chart(document.getElementById('cumChart'), {
+                type: 'line',
+                data: { labels, datasets: [{ label: '累计分布 (%)', data: cumValues, fill: true, backgroundColor: 'rgba(46, 204, 113, 0.2)', borderColor: 'rgba(46, 204, 113, 1)', tension: 0.1 }] },
+                options: { plugins: { title: { display: true, text: `累计分布图 (${maxLevel}级)` } }, scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: '累计百分比 (%)' } }, x: { title: { display: true, text: '总属性值' } } } }
+            });
+        }
+
+        function initCurrentLevels(maxLevel = 10) {
+            const column1 = document.getElementById('column1');
+            const column2 = document.getElementById('column2');
+            column1.innerHTML = '';
+            column2.innerHTML = '';
+            for (let i = 1; i <= maxLevel; i++) {
+                const div = document.createElement('div');
+                div.className = 'level-box';
+                const options = (i <= 5) ? `
+                    <option value="25" selected>25</option>
+                    <option value="50">50</option>
+                    <option value="75" >75</option>
+                    <option value="100">100</option>
+                ` : `
+                    <option value="50" selected>50</option>
+                    <option value="100" >100</option>
+                    <option value="150">150</option>
+                    <option value="200">200</option>
+                `;
+                div.innerHTML = `
+                    <label>等级 ${i}:</label>
+                    <select class="current-level" data-level="${i}">
+                        ${options}
+                    </select>
+                `;
+                if (i <= Math.ceil(maxLevel / 2)) {
+                    column1.appendChild(div);
+                } else {
+                    column2.appendChild(div);
+                }
+            }
+        }
+
+        function analyzeCurrent() {
+            const maxLevel = parseInt(document.getElementById('currentGrindLevel').value);
+			const appendLevel = parseInt(document.getElementById('currentAppendLevel').value);
+
+			const current = [];
+			document.querySelectorAll('.current-level').forEach(select => {
+				const level = parseInt(select.dataset.level);
+				if (level <= maxLevel) {  // 只处理当前等级范围内的值
+					const base = parseInt(select.value);
+					const multiplier = (level <= appendLevel) ? probData[level].multiplier : 1;
+					const final = base * multiplier;
+					current.push({ base, final });
+				}
+			});
+
+            const currentTotal = current.reduce((sum, r) => sum + r.final, 0);
+
+            // 模拟总加成分布
+            const simCount = 10000;
+            const totals = [];
+            for (let i = 0; i < simCount; i++) {
+                const sim = simulateOne(maxLevel, appendLevel);
+                totals.push(sim.reduce((sum, r) => sum + r.final, 0));
+            }
+            const averageTotal = totals.reduce((sum, val) => sum + val, 0) / simCount;
+            const betterCount = totals.filter(t => t < currentTotal).length;
+            const percentile = (betterCount / simCount * 100).toFixed(2);
+            const worseCount = totals.filter(t => t > currentTotal).length;
+            const worsePercentile = (worseCount / simCount * 100).toFixed(2);
+
+            // 计算每个重置方案的收益分布
+            const resetOptions = [];
+            resetOptions.push({ resetLevel: 0, totals: [currentTotal] }); // 不重置
+            for (let resetLevel = 1; resetLevel <= maxLevel; resetLevel++) {
+                const retained = resetLevel < maxLevel ? current.slice(resetLevel).reduce((sum, r) => sum + r.final, 0) : 0;
+                const simTotals = [];
+                for (let i = 0; i < simCount; i++) {
+                    const sim = simulateOne(resetLevel, appendLevel);
+                    const simTotal = sim.reduce((sum, r) => sum + r.final, 0) + retained;
+                    simTotals.push(simTotal);
+                }
+                resetOptions.push({ resetLevel, totals: simTotals });
+            }
+
+            // 计算每个方案的统计数据
+            const analyzedOptions = resetOptions.map(option => {
+                const totals = option.totals;
+                const expectedTotal = totals.reduce((sum, val) => sum + val, 0) / simCount;
+                const netGain = expectedTotal - currentTotal;
+                totals.sort((a, b) => a - b);
+                const p25 = totals[Math.floor(simCount * 0.25)];
+                const p50 = totals[Math.floor(simCount * 0.5)];
+                const p75 = totals[Math.floor(simCount * 0.75)];
+                const exceedCurrent = totals.filter(t => t > currentTotal).length / simCount * 100;
+                return { resetLevel: option.resetLevel, expectedTotal, netGain, distribution: { p25, p50, p75 }, exceedCurrent };
+            });
+
+            // 按净收益排序并取前十
+            analyzedOptions.sort((a, b) => b.netGain - a.netGain);
+            const topTen = analyzedOptions.slice(0, 10);
+
+            // 生成输出
+            let output = '<h3>当前状态分析</h3>';
+            output += `<p>当前研磨等级: ${maxLevel}</p>`;
+            output += `<p>追加等级: ${appendLevel} (1-${appendLevel}级有倍率加成)</p>`;
+            output += `<p>当前总加成: ${currentTotal}</p>`;
+            output += `<p>模拟平均总加成: ${averageTotal.toFixed(2)} (与平均差值: ${(currentTotal - averageTotal).toFixed(2)})</p>`;
+            output += `<p>百分位评估: 优于 ${percentile}% 的模拟结果，低于 ${worsePercentile}% 的模拟结果</p>`;
+            output += '<h4>最优重置方案 (Top 10):</h4>';
+            output += '<ol>';
+            topTen.forEach(option => {
+                if (option.resetLevel === 0) {
+                    output += `<li>不重置 - 当前总加成: ${option.expectedTotal.toFixed(2)}, 净收益: ${option.netGain.toFixed(2)}</li>`;
+                } else {
+                    output += `<li>重置等级 ${option.resetLevel} - 期望总加成: ${option.expectedTotal.toFixed(2)}, 净收益: ${option.netGain.toFixed(2)}<br>`;
+                    output += `收益分布: [25%: ${option.distribution.p25}, 50%: ${option.distribution.p50}, 75%: ${option.distribution.p75}]<br>`;
+                    output += `超过当前加成概率: ${option.exceedCurrent.toFixed(2)}%</li>`;
+                }
+            });
+            output += '</ol>';
+
+            document.getElementById('analysisResults').innerHTML = output;
+        }
+
+        // 初始化
+        initCurrentLevels();
+        document.getElementById('currentGrindLevel').addEventListener('change', () => {
+            const maxLevel = parseInt(document.getElementById('currentGrindLevel').value);
+            initCurrentLevels(maxLevel);
+        });
+    </script>
+</body>
+</html>
