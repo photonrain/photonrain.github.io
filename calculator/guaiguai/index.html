@@ -506,75 +506,93 @@ var _hmt = _hmt || [];
                 setTimeout(() => div.remove(), 2000);
             }
         }
-        async function draw(count) {
-            isDrawing = true;
-            const delay = isFastMode ? 0 : 30;
-
-            for (let i = 0; i < count && isDrawing; i++) {
-                const result = {
-                    type: getRandomType(),
-                    quality: getRandomQuality()
-                };
-                addResult(result);
-                
-                if (!isFastMode) await new Promise(r => setTimeout(r, delay));
-                else if (i % 10 === 0) await new Promise(r => setTimeout(r, 0));
-            }
-            isDrawing = false;
-        }
+        async function draw(times = 1) {
+			if (isDrawing) return;
+			isDrawing = true;
+			
+			for (let i = 0; i < times && isDrawing; i++) {
+				const result = {
+					type: getRandomType(),
+					quality: getRandomQuality()
+				};
+				
+				addResult(result);
+				
+				if (!isFastMode) {
+					await new Promise(r => setTimeout(r, 30));
+					updateRecentTable();
+					updateStats();
+				}
+			}
+			
+			if (isFastMode) {
+				updateRecentTable();
+				updateStats();
+			}
+			
+			isDrawing = false;
+		}
 
         async function startTargetDraw() {
-		// 在开始前强制检查一次合成面板状态
     updateSynthesisVisibility();
-             isDrawing = true;
+    isDrawing = true;
     const targetType = document.getElementById('targetType').value;
     const targetQuality = document.getElementById('targetQuality').value;
-    
-    // 只有当目标是傲天SS时才启用合成逻辑
-    const enableSynthesis = (targetType === '傲天' && targetQuality === 'SS');const delay = isFastMode ? 0 : 30;
+    const enableSynthesis = (targetType === '傲天' && targetQuality === 'SS');
+    const shouldFastMode = isFastMode; // 修改这行
+    const delay = shouldFastMode ? 0 : 30;
 
-            while(isDrawing) {
-                const result = {
-                    type: getRandomType(),
-                    quality: getRandomQuality()
-                };
-                
-                const isSSSynthesized = addResult(result);
+    while(isDrawing) {
+        const result = {
+            type: getRandomType(),
+            quality: getRandomQuality()
+        };
+        
+        const isSSSynthesized = addResult(result);
 
-                const typeMatch = targetType === 'any' || result.type === targetType;
-                const qualityMatch = targetQuality === 'any' || result.quality === targetQuality;
-                
-                // 成功条件：直接抽到或合成得到
-                if ((typeMatch && qualityMatch) || (targetType === '傲天' && targetQuality === 'SS' && isSSSynthesized)) {
-                    isDrawing = false;
-                    alert(`🎉 成功在第${totalDraws}抽获得目标！\n类型：傲天\n品质：SS`);
-                    break;
-                }
-                
-                await new Promise(r => setTimeout(r, delay));
-            }
+        const typeMatch = targetType === 'any' || result.type === targetType;
+        const qualityMatch = targetQuality === 'any' || result.quality === targetQuality;
+        
+        if ((typeMatch && qualityMatch) || (enableSynthesis && isSSSynthesized)) {
             isDrawing = false;
+            alert(`🎉 成功在第${totalDraws}抽获得目标！\n类型：${result.type}\n品质：${result.quality}`);
+            break;
         }
+        
+        if (!shouldFastMode) {
+            await new Promise(r => setTimeout(r, delay));
+        }
+    }
+    isDrawing = false;
+}
 
         function stopDrawing() {
             isDrawing = false;
         }
 
         function resetData() {
-            isDrawing = false;
-            totalDraws = 0;
-            allResults = [];
-            inventory = { B: 0, A: 0, S: 0, SS: 0 }; // 重置库存
-            updateInventoryDisplay();
-            document.getElementById('costPerDraw').value = '1000';
-            
-            Object.keys(combinationStats).forEach(key => {
-                combinationStats[key].count = 0;
-                updateCombinationStats(key);
-            });
-            
-            updateRecentTable();
-            updateStats();
+            results = [];
+    totalDraws = 0;
+    allResults = [];
+    inventory = { B: 0, A: 0, S: 0, SS: 0 }; // 重置库存
+    synthesizedSS = false; // 重置合成状态
+    
+    // 重置组合统计
+    Object.keys(combinationStats).forEach(key => {
+        combinationStats[key].count = 0;
+        updateCombinationStats(key);
+    });
+    
+    isDrawing = false; // 确保停止当前抽卡
+    
+    // 更新显示
+    updateInventoryDisplay();
+    updateRecentTable();
+    updateStats();
+    updateSynthesisVisibility();
+    
+    // 重置抽卡价格为默认值
+    document.getElementById('costPerDraw').value = '1000';
         }
     </script>
 </body>
