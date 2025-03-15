@@ -252,7 +252,7 @@ var _hmt = _hmt || [];
     </div>
 
     <div class="results">
-        <div class="card">
+        <div class="card" id="recentCard">
             <h3>📝 最近抽取记录 (最新10条)</h3>
             <table id="recentResults">
                 <tr><th>类型</th><th>品质</th><th>时间</th></tr>
@@ -377,11 +377,20 @@ var _hmt = _hmt || [];
         }
 
         function toggleFastMode() {
-            isFastMode = !isFastMode;
-            const btn = document.getElementById('fastModeBtn');
-            btn.style.backgroundColor = isFastMode ? '#f9844a' : '#f9c74f';
-            btn.textContent = isFastMode ? '🚀 极速模式(ON)' : '🚀 极速模式';
-        }
+			isFastMode = !isFastMode;
+			const btn = document.getElementById('fastModeBtn');
+			btn.style.backgroundColor = isFastMode ? '#f9844a' : '#f9c74f';
+			btn.textContent = isFastMode ? '🚀 极速模式(ON)' : '🚀 极速模式';
+			
+			// 新增：控制最近抽取记录的显示
+			document.getElementById('recentCard').style.display = isFastMode ? 'none' : 'block';
+			
+			// 新增：清空已有记录
+			if(isFastMode) {
+				allResults = [];
+				updateRecentTable();
+			}
+		}
 
         function updateStats() {
             document.getElementById('totalDraws').textContent = totalDraws;
@@ -411,33 +420,36 @@ var _hmt = _hmt || [];
 
         // 修改后的addResult函数
         function addResult(result) {
-            totalDraws++;
-            costPerDraw = parseInt(document.getElementById('costPerDraw').value) || 0;
-            
-            // 如果是傲天卡且开启合成
-            if (result.type === '傲天' && isAutoSynthesis) {
-                inventory[result.quality]++;
-                updateInventoryDisplay();
-                checkSynthesis();
-            }
+			totalDraws++;
+			costPerDraw = parseInt(document.getElementById('costPerDraw').value) || 0;
+			
+			// 如果是傲天卡且开启合成
+			if (result.type === '傲天' && isAutoSynthesis) {
+				inventory[result.quality]++;
+				updateInventoryDisplay();
+				checkSynthesis();
+			}
 
-            // 更新组合统计
-            const comboKey = `${result.type}${result.quality}`;
-            combinationStats[comboKey].count++;
-            updateCombinationStats(comboKey);
-            
-            // 更新最近记录
-            allResults.unshift({
-                ...result,
-                time: new Date().toLocaleTimeString()
-            });
-            if (allResults.length > 10) allResults.pop();
-            updateRecentTable();
-            updateStats();
+			// 更新组合统计
+			const comboKey = `${result.type}${result.quality}`;
+			combinationStats[comboKey].count++;
+			updateCombinationStats(comboKey);
+			
+			// 修改：仅在非极速模式记录最近抽取
+			if(!isFastMode) {
+				allResults.unshift({
+					...result,
+					time: new Date().toLocaleTimeString()
+				});
+				if (allResults.length > 10) allResults.pop();
+				updateRecentTable();
+			}
+			
+			updateStats();
 
-            // 返回是否通过合成得到SS
-            return synthesizedSS;
-        }
+			// 返回是否通过合成得到SS
+			return synthesizedSS;
+		}
 		function checkSynthesis() {
             let updated = true;
             while(updated) {
