@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/1.0.2/chartjs-plugin-annotation.min.js"></script>
+
+<head>
+    <meta charset="UTF-8">
+    <title>冒险岛宝玉加工模拟器</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        .panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            flex: 1;
+        }
+        h1 {
+            color: #1a237e;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #1a237e;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #283593;
+        }
+        #results {
+            margin-top: 20px;
+        }
+        canvas {
+            width: 100%;
+            max-width: 600px;
+            margin-top: 20px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>冒险岛宝玉加工模拟器</h1>
+    <h4 style="text-align: center; margin-bottom: 5px;">    by 紫电NS
+            <a href="https://photonrain.github.io/" class="ms-3" style="color: #3498db; text-decoration: none;">网站首页</a>
+        
+    <div class="container">
+        <div class="panel">
+            <h2>模拟强化</h2>
+            <div class="input-group">
+                <label>当前等级</label>
+                <input type="number" id="currentLevel" min="0" max="9" value="0">
+            </div>
+            <div class="input-group">
+                <label>目标等级</label>
+                <input type="number" id="targetLevel" min="1" max="10" value="10">
+            </div>
+            <div class="input-group">
+                <label>模拟次数</label>
+                <input type="number" id="simulations" min="1" value="1000">
+            </div>
+            <button onclick="simulate()">开始模拟</button>
+            <div id="results"></div>
+            <canvas id="levelDistChart"></canvas>
+            <canvas id="cumulativeChart"></canvas>
+        </div>
+
+        <div class="panel">
+            <h2>限制金币模拟</h2>
+            <div class="input-group">
+                <label>当前等级</label>
+                <input type="number" id="currentLevel2" min="0" max="9" value="0">
+            </div>
+            <div class="input-group">
+                <label>目标等级</label>
+                <input type="number" id="targetLevel2" min="1" max="10" value="10">
+            </div>
+            <div class="input-group">
+                <label>可用金币</label>
+                <input type="number" id="availableGold" min="1" value="100">
+            </div>
+            <div class="input-group">
+                <label>模拟次数</label>
+                <input type="number" id="simulations2" min="1" value="1000">
+            </div>
+            <button onclick="simulateWithGold()">开始模拟</button>
+            <div id="results2"></div>
+            <canvas id="finalLevelChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量存储图表实例
+        let levelDistChart = null;
+        let cumulativeChart = null;
+        let finalLevelChart = null;
+
+        const probTable = [
+            {cost: 1, success: 1.0, down: 0.0, fail: 0.0},
+            {cost: 1, success: 0.4, down: 0.6, fail: 0.0},
+            {cost: 1, success: 0.4, down: 0.55, fail: 0.05},
+            {cost: 1, success: 0.3, down: 0.6, fail: 0.1},
+            {cost: 1, success: 0.3, down: 0.6, fail: 0.1},
+            {cost: 2, success: 0.8, down: 0.0, fail: 0.2},
+            {cost: 2, success: 0.4, down: 0.4, fail: 0.2},
+            {cost: 2, success: 0.4, down: 0.4, fail: 0.2},
+            {cost: 3, success: 0.3, down: 0.4, fail: 0.3},
+            {cost: 3, success: 0.3, down: 0.4, fail: 0.3}
+        ];
+
+        function singleSimulation(currentLevel, targetLevel) {
+            let level = currentLevel;
+            let cost = 0;
+            let levelHistory = new Array(11).fill(0);
+
+            while (level < targetLevel) {
+                const prob = probTable[level];
+                cost += prob.cost;
+                levelHistory[level]++;
+
+                const rand = Math.random();
+                if (rand < prob.success) {
+                    level++;
+                } else if (rand < prob.success + prob.down) {
+                    level = Math.max(0, level - 1);
+                } else {
+                    level = 0;
+                }
+            }
+
+            return { cost, levelHistory };
+        }
+
+        function simulate() {
+    const currentLevel = parseInt(document.getElementById('currentLevel').value);
+    const targetLevel = parseInt(document.getElementById('targetLevel').value);
+    const simCount = parseInt(document.getElementById('simulations').value);
+
+    let totalCost = 0;
+    let totalLevelHistory = new Array(11).fill(0);
+    let costHistory = []; // 记录每次模拟的花费
+
+    for (let i = 0; i < simCount; i++) {
+        const result = singleSimulation(currentLevel, targetLevel);
+        totalCost += result.cost;
+        costHistory.push(result.cost);
+        result.levelHistory.forEach((count, index) => {
+            totalLevelHistory[index] += count;
+        });
+    }
+
+    const avgCost = totalCost / simCount;
+    const avgLevelHistory = totalLevelHistory.map(count => count / simCount);
+
+    document.getElementById('results').innerHTML = `
+        平均消耗金币: ${avgCost.toFixed(2)}
+    `;
+
+    drawLevelDistChart(avgLevelHistory);
+    drawCumulativeChart(costHistory, avgCost);
+}
+
+        function simulateWithGold() {
+            const currentLevel = parseInt(document.getElementById('currentLevel2').value);
+            const targetLevel = parseInt(document.getElementById('targetLevel2').value);
+            const availableGold = parseInt(document.getElementById('availableGold').value);
+            const simCount = parseInt(document.getElementById('simulations2').value);
+
+            let finalLevels = new Array(11).fill(0);
+
+            for (let i = 0; i < simCount; i++) {
+                let level = currentLevel;
+                let remainingGold = availableGold;
+
+                while (remainingGold > 0 && level < targetLevel) {
+                    const prob = probTable[level];
+                    if (remainingGold < prob.cost) break;
+
+                    remainingGold -= prob.cost;
+                    const rand = Math.random();
+                    if (rand < prob.success) {
+                        level++;
+                    } else if (rand < prob.success + prob.down) {
+                        level = Math.max(0, level - 1);
+                    } else {
+                        level = 0;
+                    }
+                }
+
+                finalLevels[level]++;
+            }
+
+            const finalLevelDist = finalLevels.map(count => count / simCount);
+
+            document.getElementById('results2').innerHTML = `
+                最可能达到的等级: ${finalLevelDist.indexOf(Math.max(...finalLevelDist))}
+            `;
+
+            drawFinalLevelChart(finalLevelDist);
+        }
+
+        function drawLevelDistChart(data) {
+            if (levelDistChart) {
+                levelDistChart.destroy();
+            }
+
+            const total = data.reduce((a, b) => a + b, 0);
+            const probData = data.map(val => (val / total * 100).toFixed(2));
+
+            const ctx = document.getElementById('levelDistChart').getContext('2d');
+            levelDistChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map((_, i) => `等级${i}`),
+                    datasets: [{
+                        label: '等级分布概率(%)',
+                        data: probData,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '概率(%)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function drawCumulativeChart(costHistory, avgCost) {
+    if (cumulativeChart) {
+        cumulativeChart.destroy();
+    }
+
+    // 对成本进行排序
+    costHistory.sort((a, b) => a - b);
+
+    // 计算累积概率分布
+    const step = Math.ceil((costHistory[costHistory.length - 1] - costHistory[0]) / 50);
+    const costBins = [];
+    const cumulativeProb = [];
+    
+    for (let cost = costHistory[0]; cost <= costHistory[costHistory.length - 1]; cost += step) {
+        costBins.push(cost);
+        const count = costHistory.filter(x => x <= cost).length;
+        cumulativeProb.push((count / costHistory.length * 100).toFixed(2));
+    }
+
+    const ctx = document.getElementById('cumulativeChart').getContext('2d');
+    cumulativeChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: costBins.map(x => x.toFixed(0)),
+            datasets: [{
+                label: '金币消耗累积概率(%)',
+                data: cumulativeProb,
+                borderColor: 'rgba(255, 99, 132, 1)',
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: '金币消耗'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: '累积概率(%)'
+                    }
+                }
+            },
+            plugins: {
+                annotation: {
+                    annotations: {
+                        line1: {
+                            type: 'line',
+                            xMin: avgCost,
+                            xMax: avgCost,
+                            borderColor: 'rgb(75, 192, 192)',
+                            borderWidth: 2,
+                            label: {
+                                content: `平均消耗: ${avgCost.toFixed(0)}`,
+                                enabled: true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+
+        function drawFinalLevelChart(data) {
+            if (finalLevelChart) {
+                finalLevelChart.destroy();
+            }
+
+            const probData = data.map(val => (val * 100).toFixed(2));
+
+            const ctx = document.getElementById('finalLevelChart').getContext('2d');
+            finalLevelChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map((_, i) => `等级${i}`),
+                    datasets: [{
+                        label: '最终等级分布概率(%)',
+                        data: probData,
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '概率(%)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
