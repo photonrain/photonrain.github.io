@@ -14,6 +14,27 @@ var _hmt = _hmt || [];
     <title>冒险岛怪怪卡模拟器</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
+		synthesis-panel {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+        .inventory {
+            display: flex;
+            gap: 15px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        .inventory-item {
+            background: #ffe0b2;
+            padding: 10px 15px;
+            border-radius: 8px;
+            min-width: 70px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
         :root {
             --primary: #6c5ce7;
             --secondary: #a8a5e6;
@@ -204,6 +225,30 @@ var _hmt = _hmt || [];
                 <div class="stat-value" id="totalCost">0</div>
             </div>
         </div>
+		<!-- 新增合成面板 -->
+        <div class="synthesis-panel" id="synthesisPanel" style="display:none;">
+            <div style="margin-bottom: 10px;">
+                <button class="btn-warning" onclick="toggleAutoSynthesis()" id="autoSynthesisBtn">⚙️ 启用自动合成</button>
+            </div>
+            <div class="inventory">
+                <div class="inventory-item">
+                    <div>B级傲天</div>
+                    <div id="inventoryB">0</div>
+                </div>
+                <div class="inventory-item">
+                    <div>A级傲天</div>
+                    <div id="inventoryA">0</div>
+                </div>
+                <div class="inventory-item">
+                    <div>S级傲天</div>
+                    <div id="inventoryS">0</div>
+                </div>
+                <div class="inventory-item">
+                    <div>SS级傲天</div>
+                    <div id="inventorySS">0</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="results">
@@ -261,12 +306,15 @@ var _hmt = _hmt || [];
     </div>
 
     <script>
+	document.addEventListener('DOMContentLoaded', () => {
+    updateSynthesisVisibility();
+});
         let isDrawing = false;
         let totalDraws = 0;
         let isFastMode = false;
         let costPerDraw = 1000;
         let allResults = [];
-
+		
         const combinationStats = {
             '普通B': { count: 0 },
             '普通A': { count: 0 },
@@ -281,7 +329,38 @@ var _hmt = _hmt || [];
             '傲天S': { count: 0 },
             '傲天SS': { count: 0 }
         };
+		// 新增合成相关变量
+        let isAutoSynthesis = false;
+        let inventory = { B: 0, A: 0, S: 0, SS: 0 };
+        let synthesizedSS = false;
 
+        // 监听目标选择变化
+        document.getElementById('targetType').addEventListener('change', updateSynthesisVisibility);
+        document.getElementById('targetQuality').addEventListener('change', updateSynthesisVisibility);
+
+        function updateSynthesisVisibility() {
+			const panel = document.getElementById('synthesisPanel');
+			const targetType = document.getElementById('targetType').value;
+			const targetQuality = document.getElementById('targetQuality').value;
+			
+			// 仅当同时选择傲天和SS时显示
+			panel.style.display = (targetType === '傲天' && targetQuality === 'SS') ? 'block' : 'none';
+			
+			// 如果不符合条件时强制关闭自动合成
+			if (panel.style.display === 'none') {
+				isAutoSynthesis = false;
+				document.getElementById('autoSynthesisBtn').textContent = '⚙️ 启用自动合成';
+				document.getElementById('autoSynthesisBtn').style.backgroundColor = '#f9c74f';
+			}
+		}
+
+        // 切换自动合成
+        function toggleAutoSynthesis() {
+            isAutoSynthesis = !isAutoSynthesis;
+            const btn = document.getElementById('autoSynthesisBtn');
+            btn.textContent = isAutoSynthesis ? '⚙️ 自动合成(ON)' : '⚙️ 启用自动合成';
+            btn.style.backgroundColor = isAutoSynthesis ? '#f9844a' : '#f9c74f';
+        }
         function getRandomType() {
             const rand = Math.random() * 100;
             if (rand < 98.794) return '普通';
@@ -330,10 +409,18 @@ var _hmt = _hmt || [];
             }
         }
 
+        // 修改后的addResult函数
         function addResult(result) {
             totalDraws++;
             costPerDraw = parseInt(document.getElementById('costPerDraw').value) || 0;
             
+            // 如果是傲天卡且开启合成
+            if (result.type === '傲天' && isAutoSynthesis) {
+                inventory[result.quality]++;
+                updateInventoryDisplay();
+                checkSynthesis();
+            }
+
             // 更新组合统计
             const comboKey = `${result.type}${result.quality}`;
             combinationStats[comboKey].count++;
@@ -347,8 +434,66 @@ var _hmt = _hmt || [];
             if (allResults.length > 10) allResults.pop();
             updateRecentTable();
             updateStats();
+
+            // 返回是否通过合成得到SS
+            return synthesizedSS;
+        }
+		function checkSynthesis() {
+            let updated = true;
+            while(updated) {
+                updated = false;
+                
+                if (inventory.B >= 2) {
+                    inventory.B -= 2;
+                    inventory.A++;
+                    updated = true;
+                    showSynthesisAlert('2个B级 → 1个A级');
+                }
+                
+                if (inventory.A >= 2) {
+                    inventory.A -= 2;
+                    inventory.S++;
+                    updated = true;
+                    showSynthesisAlert('2个A级 → 1个S级');
+                }
+                
+                if (inventory.S >= 2) {
+                    inventory.S -= 2;
+                    inventory.SS++;
+                    synthesizedSS = true;
+                    updated = true;
+                    showSynthesisAlert('2个S级 → 1个SS级');
+                }
+                
+                updateInventoryDisplay();
+            }
         }
 
+        // 更新库存显示
+        function updateInventoryDisplay() {
+            document.getElementById('inventoryB').textContent = inventory.B;
+            document.getElementById('inventoryA').textContent = inventory.A;
+            document.getElementById('inventoryS').textContent = inventory.S;
+            document.getElementById('inventorySS').textContent = inventory.SS;
+        }
+
+        // 合成提示
+        function showSynthesisAlert(message) {
+            if (!isFastMode) {
+                const div = document.createElement('div');
+                div.textContent = `傲天合成成功：${message}`;
+                div.style.position = 'fixed';
+                div.style.bottom = '20px';
+                div.style.right = '20px';
+                div.style.background = '#4CAF50';
+                div.style.color = 'white';
+                div.style.padding = '15px';
+                div.style.borderRadius = '8px';
+                div.style.zIndex = '9999';
+                document.body.appendChild(div);
+                setTimeout(() => div.remove(), 2000);
+            }
+        }
         async function draw(count) {
             isDrawing = true;
             const delay = isFastMode ? 0 : 30;
@@ -367,10 +512,14 @@ var _hmt = _hmt || [];
         }
 
         async function startTargetDraw() {
-            isDrawing = true;
-            const targetType = document.getElementById('targetType').value;
-            const targetQuality = document.getElementById('targetQuality').value;
-            const delay = isFastMode ? 0 : 30;
+		// 在开始前强制检查一次合成面板状态
+    updateSynthesisVisibility();
+             isDrawing = true;
+    const targetType = document.getElementById('targetType').value;
+    const targetQuality = document.getElementById('targetQuality').value;
+    
+    // 只有当目标是傲天SS时才启用合成逻辑
+    const enableSynthesis = (targetType === '傲天' && targetQuality === 'SS');const delay = isFastMode ? 0 : 30;
 
             while(isDrawing) {
                 const result = {
@@ -378,14 +527,15 @@ var _hmt = _hmt || [];
                     quality: getRandomQuality()
                 };
                 
-                addResult(result);
+                const isSSSynthesized = addResult(result);
 
                 const typeMatch = targetType === 'any' || result.type === targetType;
                 const qualityMatch = targetQuality === 'any' || result.quality === targetQuality;
                 
-                if (typeMatch && qualityMatch) {
+                // 成功条件：直接抽到或合成得到
+                if ((typeMatch && qualityMatch) || (targetType === '傲天' && targetQuality === 'SS' && isSSSynthesized)) {
                     isDrawing = false;
-                    alert(`🎉 成功在第${totalDraws}抽获得目标！\n类型：${result.type}\n品质：${result.quality}`);
+                    alert(`🎉 成功在第${totalDraws}抽获得目标！\n类型：傲天\n品质：SS`);
                     break;
                 }
                 
@@ -402,9 +552,10 @@ var _hmt = _hmt || [];
             isDrawing = false;
             totalDraws = 0;
             allResults = [];
+            inventory = { B: 0, A: 0, S: 0, SS: 0 }; // 重置库存
+            updateInventoryDisplay();
             document.getElementById('costPerDraw').value = '1000';
             
-            // 重置组合统计数据
             Object.keys(combinationStats).forEach(key => {
                 combinationStats[key].count = 0;
                 updateCombinationStats(key);
