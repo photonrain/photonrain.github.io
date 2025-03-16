@@ -260,18 +260,19 @@ var _hmt = _hmt || [];
                 </div>
 
                 <div style="display: grid; gap: 10px; margin-top: 15px;">
-                    <label>
-                        <input type="checkbox" id="sundayMode"> 周日必成模式
-                        <span style="color: #666; font-size: 0.9em;">(5→6/10→11/15→16必定成功)</span>
-                    </label>
-                    <label>
-                        <input type="checkbox" id="noDrop"> 失败不掉星
-                    </label>
-                    <label>
-                        <input type="checkbox" id="antiExplode"> 防爆模式
-                        <span style="color: #666; font-size: 0.9em;">(12-16星)</span>
-                    </label>
-                </div>
+					<label>
+						<input type="checkbox" id="sundayMode"> 周日必成模式（5-6，10-11，15-16）
+					</label>
+					<label>
+						<input type="checkbox" id="antiExplode"> 防爆卷轴（12-16防爆）
+					</label>
+					<label>
+						<input type="checkbox" id="noDrop"> 不掉星模式
+					</label>
+					<label>
+						<input type="checkbox" id="rapidMode"> 急速模式
+					</label>
+				</div>
             </div>
 
             
@@ -561,43 +562,55 @@ var _hmt = _hmt || [];
         }
 		
         function startSimulation() {
-            if (simulationRunning) return;
-            
-            const config = {
-                maxStars: parseInt(document.getElementById('maxStars').value),
-                currentStars: Math.min(
-                    parseInt(document.getElementById('currentStars').value),
-                    parseInt(document.getElementById('maxStars').value)
-                ),
-                targetStars: parseInt(document.getElementById('targetStars').value) || 
-                           parseInt(document.getElementById('maxStars').value),
-                destroyedStars: Math.min(
-                    parseInt(document.getElementById('destroyedStars').value),
-                    parseInt(document.getElementById('maxStars').value)
-                )
-            };
+				if (simulationRunning) return;
+				
+				const config = {
+					maxStars: parseInt(document.getElementById('maxStars').value),
+					currentStars: Math.min(
+						parseInt(document.getElementById('currentStars').value),
+						parseInt(document.getElementById('maxStars').value)
+					),
+					targetStars: parseInt(document.getElementById('targetStars').value) || 
+							   parseInt(document.getElementById('maxStars').value),
+					destroyedStars: Math.min(
+						parseInt(document.getElementById('destroyedStars').value),
+						parseInt(document.getElementById('maxStars').value)
+					)
+				};
 
-            let state = {
-                stars: config.currentStars,
-                attempts: 0,
-                destroys: 0,
-                histogram: {}
-            };
+				let state = {
+					stars: config.currentStars,
+					attempts: 0,
+					destroys: 0,
+					histogram: {}
+				};
 
-            simulationRunning = true;
-            document.getElementById('startButton').disabled = true;
-            document.getElementById('stopButton').disabled = false;
-            const maxAttempts = 100000000;
-            
-            simulationInterval = setInterval(() => {
-                if (state.stars >= config.targetStars || state.attempts >= maxAttempts) {
-                    stopSimulation();
-                    return;
-                }
-                simulateStep(state, config);
-                updateResults(state);
-            }, 0.0001);
-        }
+				simulationRunning = true;
+				document.getElementById('startButton').disabled = true;
+				document.getElementById('stopButton').disabled = false;
+				const maxAttempts = 100000000;
+				
+				const isRapidMode = document.getElementById('rapidMode').checked;
+
+				if (isRapidMode) {
+					// 急速模式：直接计算到结束
+					while (state.stars < config.targetStars && state.attempts < maxAttempts) {
+						simulateStep(state, config);
+					}
+					updateResults(state);
+					stopSimulation();
+				} else {
+					// 普通模式：逐步计算并更新
+					simulationInterval = setInterval(() => {
+						if (state.stars >= config.targetStars || state.attempts >= maxAttempts) {
+							stopSimulation();
+							return;
+						}
+						simulateStep(state, config);
+						updateResults(state);
+					}, 0.0001);
+				}
+			}
 
         function simulateStep(state, config) {
             state.attempts++;
