@@ -10,7 +10,7 @@ var _hmt = _hmt || [];
 })();
 </script>
 <head>
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <meta charset="UTF-8">
     <title>冒险岛星之力强化模拟器</title>
 	
@@ -222,6 +222,43 @@ var _hmt = _hmt || [];
             border-bottom: 2px solid var(--primary);
             padding-bottom: 10px;
         }
+		.stats-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2列布局 */
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.stats-section {
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    height: 400px; /* 固定高度 */
+}
+
+.stats-section h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+}
+
+.stats-section canvas {
+    max-height: 280px !important; /* 限制图表高度 */
+    width: 100% !important;
+}
+
+.stats-summary {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.stats-summary p {
+    margin: 5px 0;
+}
+
+
     </style>
 </head>
 <body>
@@ -281,6 +318,7 @@ var _hmt = _hmt || [];
         <div class="button-group">
             <button id="startButton" onclick="startSimulation()">🚀 开始强化</button>
             <button id="stopButton" onclick="stopSimulation()" disabled>⏹ 停止模拟</button>
+			  <button id="statsButton">统计模拟</button>
         </div>
 
         <div class="results-panel">
@@ -306,6 +344,46 @@ var _hmt = _hmt || [];
             </div>
         </div>
     </div>
+	<div id="statsResults" style="display: none;">
+    <h2>统计模拟结果 (10000次)</h2>
+    <div class="stats-container">
+        <div class="stats-section">
+            <h3>尝试次数分布</h3>
+            <canvas id="attemptsChart"></canvas>
+            <div class="stats-summary">
+                <p>平均尝试次数: <span id="avgAttempts">0</span></p>
+                <p>最小尝试次数: <span id="minAttempts">0</span></p>
+                <p>最大尝试次数: <span id="maxAttempts">0</span></p>
+            </div>
+        </div>
+		<div class="stats-section">
+    <h3>尝试次数累计概率分布</h3>
+    <canvas id="cumulativeChart"></canvas>
+    <div class="stats-summary">
+        <p>50%概率完成所需次数: <span id="median">0</span></p>
+        <p>90%概率完成所需次数: <span id="percentile90">0</span></p>
+        <p>95%概率完成所需次数: <span id="percentile95">0</span></p>
+    </div>
+</div>
+
+        
+        <div class="stats-section">
+            <h3>损坏次数分布</h3>
+            <canvas id="destroyChart"></canvas>
+            <div class="stats-summary">
+                <p>平均损坏次数: <span id="avgDestroys">0</span></p>
+                <p>最小损坏次数: <span id="minDestroys">0</span></p>
+                <p>最大损坏次数: <span id="maxDestroys">0</span></p>
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <h3>星星到达频率分布</h3>
+            <canvas id="starsReachedChart"></canvas>
+        </div>
+		
+    </div>
+</div>
 	<div class="control-group">
 				<label>📜 星之力概率表</label>
 				<div id="probabilityTable" style="margin-top: 10px;"></div>
@@ -667,6 +745,320 @@ var _hmt = _hmt || [];
                 chart.appendChild(container);
             });
         }
+		
+		// 添加统计模拟相关函数
+function runStatisticalSimulation() {
+    const config = {
+        maxStars: parseInt(document.getElementById('maxStars').value),
+        currentStars: parseInt(document.getElementById('currentStars').value),
+        targetStars: parseInt(document.getElementById('targetStars').value),
+        destroyedStars: parseInt(document.getElementById('destroyedStars').value)
+    };
+
+    const results = [];
+    const starsReached = new Array(config.maxStars + 1).fill(0);
+    
+    // 运行1000次模拟
+    for(let i = 0; i < 10000; i++) {
+        let result = simulateToTarget(config);
+        results.push(result);
+        
+        // 更新到达频率
+        result.starsReached.forEach((count, star) => {
+            starsReached[star] += count;
+        });
+    }
+
+    // 处理统计数据
+    const attemptStats = {
+        values: results.map(r => r.attempts),
+        avg: average(results.map(r => r.attempts)),
+        min: Math.min(...results.map(r => r.attempts)),
+        max: Math.max(...results.map(r => r.attempts))
+    };
+
+    const destroyStats = {
+        values: results.map(r => r.destroys),
+        avg: average(results.map(r => r.destroys)),
+        min: Math.min(...results.map(r => r.destroys)),
+        max: Math.max(...results.map(r => r.destroys))
+    };
+
+    // 显示结果
+    document.getElementById('statsResults').style.display = 'block';
+    updateStatsDisplay(attemptStats, destroyStats, starsReached);
+}
+
+function simulateToTarget(config) {
+    let stars = config.currentStars;
+    let attempts = 0;
+    let destroys = 0;
+    let starsReached = new Array(config.maxStars + 1).fill(0);
+
+    while(stars < config.targetStars) {
+        attempts++;
+        starsReached[stars]++;
+        
+        const prob = getCurrentProb(stars, config.maxStars);
+        const rand = Math.random();
+        
+        if(rand < prob.success) {
+            stars++;
+        } else if(rand < prob.success + prob.failure) {
+            if(!document.getElementById('noDrop').checked && 
+               probabilityTable[config.maxStars][stars].failureDrops) {
+                stars = Math.max(0, stars - 1);
+            }
+        } else {
+            stars = config.destroyedStars;
+            destroys++;
+        }
+    }
+
+    return {attempts, destroys, starsReached};
+}
+
+function average(arr) {
+    return arr.reduce((a, b) => a + b, 0) / arr.length;
+}
+
+function updateStatsDisplay(attemptStats, destroyStats, starsReached) {
+    // 更新数值统计
+    document.getElementById('avgAttempts').textContent = Math.round(attemptStats.avg);
+    document.getElementById('minAttempts').textContent = attemptStats.min;
+    document.getElementById('maxAttempts').textContent = attemptStats.max;
+    
+    document.getElementById('avgDestroys').textContent = destroyStats.avg;
+    document.getElementById('minDestroys').textContent = destroyStats.min;
+    document.getElementById('maxDestroys').textContent = destroyStats.max;
+
+    // 绘制分布图
+    drawDistributionChart('attemptsChart', attemptStats.values, '尝试次数分布');
+    drawDistributionChart('destroyChart', destroyStats.values, '损坏次数分布');
+    drawStarsReachedChart('starsReachedChart', starsReached);
+	drawCumulativeChart('cumulativeChart', attemptStats.values);
+}
+
+function drawDistributionChart(elementId, data, title) {
+    // 计算bin的大小和范围
+    const binSize = Math.ceil((Math.max(...data) - Math.min(...data)) / 20); // 将范围分成约20个bin
+    const minValue = Math.min(...data);
+    const maxValue = Math.max(...data);
+    const distribution = new Map(); // 使用Map保持顺序
+    
+    // 创建所有可能的bin
+    for (let binStart = minValue; binStart <= maxValue; binStart += binSize) {
+        const binKey = `${binStart}-${binStart + binSize - 1}`;
+        distribution.set(binKey, 0);
+    }
+
+    // 对数据进行分组
+    data.forEach(value => {
+        const binIndex = Math.floor((value - minValue) / binSize);
+        const binStart = minValue + binIndex * binSize;
+        const binKey = `${binStart}-${binStart + binSize - 1}`;
+        distribution.set(binKey, distribution.get(binKey) + 1);
+    });
+
+    // 准备图表数据
+    const labels = Array.from(distribution.keys());
+    const values = Array.from(distribution.values());
+    const percentages = values.map(v => (v / data.length * 100).toFixed(1));
+
+    // 销毁旧图表
+    const ctx = document.getElementById(elementId);
+    const existingChart = Chart.getChart(ctx);
+    if (existingChart) {
+        existingChart.destroy();
+    }
+
+    // 创建新图表
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '出现频率 (%)',
+                data: percentages,
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: '百分比 (%)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: title
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `频率: ${context.parsed.y}%`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function drawStarsReachedChart(elementId, data) {
+    const total = data.reduce((a, b) => a + b, 0);
+    const percentages = data.map(count => (count / total * 100).toFixed(1));
+    const labels = data.map((_, i) => `${i}星`);
+
+    // 销毁旧图表
+    const ctx = document.getElementById(elementId);
+    const existingChart = Chart.getChart(ctx);
+    if (existingChart) {
+        existingChart.destroy();
+    }
+
+    // 创建新图表
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '到达频率 (%)',
+                data: percentages,
+                backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: '百分比 (%)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: '星级'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+function drawCumulativeChart(elementId, data) {
+    // 对数据进行排序
+    const sortedData = [...data].sort((a, b) => a - b);
+    
+    // 计算累计概率
+    const cumulativeData = [];
+    const labels = [];
+    const totalCount = sortedData.length;
+    
+    // 计算关键百分位数
+    const median = sortedData[Math.floor(totalCount * 0.5)];
+    const percentile90 = sortedData[Math.floor(totalCount * 0.9)];
+    const percentile95 = sortedData[Math.floor(totalCount * 0.95)];
+    
+    // 更新显示
+    document.getElementById('median').textContent = median;
+    document.getElementById('percentile90').textContent = percentile90;
+    document.getElementById('percentile95').textContent = percentile95;
+
+    // 创建累计概率数据点
+    let currentCount = 0;
+    let lastValue = -1;
+    sortedData.forEach((value, index) => {
+        if (value !== lastValue) {
+            if (lastValue !== -1) {
+                labels.push(lastValue);
+                cumulativeData.push((currentCount / totalCount * 100).toFixed(2));
+            }
+            lastValue = value;
+        }
+        currentCount++;
+    });
+    // 添加最后一个点
+    labels.push(lastValue);
+    cumulativeData.push((currentCount / totalCount * 100).toFixed(2));
+
+    // 销毁旧图表
+    const ctx = document.getElementById(elementId);
+    const existingChart = Chart.getChart(ctx);
+    if (existingChart) {
+        existingChart.destroy();
+    }
+
+    // 创建新图表
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '累计概率 (%)',
+                data: cumulativeData,
+                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                fill: true,
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: '累计概率 (%)'
+                    },
+                    max: 100
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: '尝试次数'
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `完成概率: ${context.parsed.y}%`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+
+// 添加按钮事件监听
+document.getElementById('statsButton').addEventListener('click', runStatisticalSimulation);
 		function renderProbabilityTable() {
 			const maxStars = parseInt(document.getElementById('maxStars').value);
 			const data = probabilityData[maxStars];
