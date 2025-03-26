@@ -548,102 +548,123 @@
         }
 
         function startSimulation() {
-            const equipType = document.getElementById("equipType").value;
-            const cubePrice = parseInt(document.getElementById("cubePrice").value);
-            const simTimes = parseInt(document.getElementById("simTimes").value);
-            const targets = [
-                document.getElementById("mainPotential").value,
-                document.getElementById("subPotential1").value,
-                document.getElementById("subPotential2").value
-            ].filter(t => t);
+    const equipType = document.getElementById("equipType").value;
+    const cubePrice = parseInt(document.getElementById("cubePrice").value);
+    const simTimes = parseInt(document.getElementById("simTimes").value);
+    const targets = [
+        document.getElementById("mainPotential").value,
+        document.getElementById("subPotential1").value,
+        document.getElementById("subPotential2").value
+    ].filter(t => t);
 
-            if (targets.length === 0) {
-                alert("请至少选择一个目标潜能！");
-                return;
-            }
+    if (targets.length === 0) {
+        alert("请至少选择一个目标潜能！");
+        return;
+    }
 
-            let totalCost = 0;
-            let successes = 0;
-            let costs = [];
-            let recentResults = [];
+    let totalCost = 0;
+    let successes = 0;
+    let costs = [];
+    let recentResults = [];
 
-            for (let i = 0; i < simTimes; i++) {
-                let cost = 0;
-                let achieved = false;
+    for (let i = 0; i < simTimes; i++) {
+        let cost = 0;
+        let achieved = false;
 
-                while (!achieved) {
-                    cost += cubePrice;
-                    const result = rollPotential(equipType);
-                    if (recentResults.length < 20) recentResults.push(result.map(r => `${r.key} (${r.level}级)`));
-                    else recentResults.shift() && recentResults.push(result.map(r => `${r.key} (${r.level}级)`));
+        while (!achieved) {
+            cost += cubePrice;
+            const result = rollPotential(equipType);
+            if (recentResults.length < 20) recentResults.push(result.map(r => `${r.key} (${r.level}级)`));
+            else recentResults.shift() && recentResults.push(result.map(r => `${r.key} (${r.level}级)`));
 
-                    achieved = checkSuccess(result, targets);
-                }
-
-                totalCost += cost;
-                costs.push(cost);
-                if (achieved) successes++;
-            }
-
-            const avgCost = totalCost / simTimes;
-            const successRate = successes / simTimes * 100;
-
-            document.getElementById("averageCost").textContent = `平均花费: ${avgCost.toFixed(2)}`;
-            document.getElementById("successRate").textContent = `成功率: ${successRate.toFixed(2)}%`;
-
-            // 调整 bin 宽度
-            const binWidth = Math.ceil((Math.max(...costs) - Math.min(...costs)) / 20); // 将数据分成 20 个 bin
-            const costDist = {};
-            costs.forEach(c => {
-                const bin = Math.floor(c / binWidth) * binWidth;
-                costDist[bin] = (costDist[bin] || 0) + 1;
-            });
-            const labels = Object.keys(costDist).map(Number).sort((a, b) => a - b);
-            const data = labels.map(l => costDist[l] / simTimes);
-
-            const cumData = [];
-            let cumSum = 0;
-            labels.forEach((l, i) => {
-                cumSum += data[i];
-                cumData.push(cumSum);
-            });
-
-            if (probChart) probChart.de力量oy();
-            if (cumProbChart) cumProbChart.de力量oy();
-
-            probChart = new Chart(document.getElementById("probChart"), {
-                type: "bar",
-                data: {
-                    labels: labels.map(l => `${l}-${l + binWidth - 1}`),
-                    datasets: [{
-                        label: "概率分布",
-                        data: data,
-                        backgroundColor: "rgba(75, 192, 192, 0.2)",
-                        borderColor: "rgba(75, 192, 192, 1)",
-                        borderWidth: 1
-                    }]
-                },
-                options: { scales: { y: { beginAtZero: true } } }
-            });
-
-            cumProbChart = new Chart(document.getElementById("cumProbChart"), {
-                type: "line",
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: "累计概率分布",
-                        data: cumData,
-                        fill: false,
-                        borderColor: "rgba(255, 99, 132, 1)",
-                        tension: 0.1
-                    }]
-                },
-                options: { scales: { y: { beginAtZero: true, max: 1 } } }
-            });
-
-            const recentDiv = document.getElementById("recentResults");
-            recentDiv.innerHTML = recentResults.map(r => `<div>${r.join(", ")}</div>`).join("");
+            achieved = checkSuccess(result, targets);
         }
+
+        totalCost += cost;
+        costs.push(cost);
+        if (achieved) successes++;
+    }
+
+    const avgCost = totalCost / simTimes;
+    const successRate = successes / simTimes * 100;
+
+    document.getElementById("averageCost").textContent = `平均花费: ${avgCost.toFixed(2)}`;
+    document.getElementById("successRate").textContent = `成功率: ${successRate.toFixed(2)}%`;
+
+    // 调试输出
+    console.log("costs:", costs.slice(0, 10)); // 输出前 10 个值
+    console.log("Min cost:", Math.min(...costs));
+    console.log("Max cost:", Math.max(...costs));
+    console.log("Average cost:", avgCost);
+
+    // 调整 bin 宽度
+    const minCost = Math.min(...costs);
+    const maxCost = Math.max(...costs);
+    const binWidth = Math.ceil((maxCost - minCost) / 20) || 1; // 防止除以 0
+    console.log("binWidth:", binWidth);
+
+    const costDist = {};
+    costs.forEach(c => {
+        const bin = Math.floor((c - minCost) / binWidth) * binWidth + minCost;
+        costDist[bin] = (costDist[bin] || 0) + 1;
+    });
+    const labels = Object.keys(costDist).map(Number).sort((a, b) => a - b);
+    console.log("labels:", labels);
+    const data = labels.map(l => costDist[l] / simTimes);
+
+    const cumData = [];
+    let cumSum = 0;
+    labels.forEach((l, i) => {
+        cumSum += data[i];
+        cumData.push(cumSum);
+    });
+
+    if (probChart) probChart.destroy();
+    if (cumProbChart) cumProbChart.destroy();
+
+    probChart = new Chart(document.getElementById("probChart"), {
+        type: "bar",
+        data: {
+            labels: labels.map(l => `${l}-${l + binWidth - 1}`),
+            datasets: [{
+                label: "概率分布",
+                data: data,
+                backgroundColor: "rgba(75, 192, 192, 0.2)",
+                borderColor: "rgba(75, 192, 192, 1)",
+                borderWidth: 1
+            }]
+        },
+        options: { 
+            scales: { 
+                y: { beginAtZero: true },
+                x: { title: { display: true, text: "花费范围" } }
+            }
+        }
+    });
+
+    cumProbChart = new Chart(document.getElementById("cumProbChart"), {
+        type: "line",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "累计概率分布",
+                data: cumData,
+                fill: false,
+                borderColor: "rgba(255, 99, 132, 1)",
+                tension: 0.1
+            }]
+        },
+        options: { 
+            scales: { 
+                y: { beginAtZero: true, max: 1 },
+                x: { title: { display: true, text: "花费" } }
+            }
+        }
+    });
+
+    const recentDiv = document.getElementById("recentResults");
+    recentDiv.innerHTML = recentResults.map(r => `<div>${r.join(", ")}</div>`).join("");
+}
 
         function resetSimulation() {
             document.getElementById("averageCost").textContent = "";
