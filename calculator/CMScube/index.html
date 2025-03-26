@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>魔方模拟器</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --secondary: #6c5ce7;
+            --background: linear-gradient(145deg, #f0f4ff 0%, #e6e9ff 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', system-ui, sans-serif;
+            background: var(--background);
+            margin: 0;
+            padding: 15px;
+            color: #2d3436;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 12px 24px -6px rgba(0,0,0,0.1);
+            backdrop-filter: blur(8px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin: 0 0 30px;
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        h1 i {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            transition: transform 0.2s;
+        }
+
+        .section:hover {
+            transform: translateY(-2px);
+        }
+
+        h2 {
+            color: var(--primary);
+            margin: 0 0 15px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        h2 i {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            align-items: start;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: 500;
+            color: #636e72;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        select, input {
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            background: var(--card-bg);
+            transition: all 0.2s;
+            width: 100%;
+            -webkit-appearance: none;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+        }
+
+        button {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(74, 144, 226, 0.15);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(74, 144, 226, 0.25);
+        }
+
+        #results {
+            margin-top: 30px;
+        }
+
+        .chart-container {
+            width: 100%;
+            margin: 25px 0;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+
+        #recentResults {
+            display: grid;
+            gap: 12px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                border-radius: 15px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            h2 {
+                font-size: 1.2rem;
+            }
+
+            .section {
+                padding: 15px;
+            }
+
+            select, input {
+                padding: 10px 12px;
+                font-size: 0.95rem;
+            }
+
+            button {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.6rem;
+            }
+
+            h2 {
+                font-size: 1.1rem;
+            }
+
+            .input-group {
+                gap: 6px;
+            }
+
+            label {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>怪异魔方模拟器</title>
+	
+            
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #e0eafc, #cfdef3);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        h1 i {
+            color: #3498db;
+            margin-right: 10px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        .section h2 {
+            color: #2980b9;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        .section h2 i {
+            margin-right: 8px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            align-items: center;
+        }
+        label {
+            font-weight: bold;
+            color: #555;
+            margin-right: 10px;
+        }
+        select, input {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            background: #fff;
+            width: 200px;
+            transition: border-color 0.3s;
+        }
+        select:focus, input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        button {
+            padding: 10px 20px;
+            background: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        button i {
+            margin-right: 5px;
+        }
+        #results {
+            margin-top: 30px;
+        }
+        .chart-container {
+            width: 100%;
+            max-width: 700px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-cube"></i>怪异魔方模拟器</h1>
+		<h4 style="text-align: center; margin-bottom: 5px;">    by 紫电NS
+            <a href="https://photonrain.github.io/" class="ms-3" style="color: #3498db; text-decoration: none;">网站首页</a>
+        
+        <div class="section">
+            <h2><i class="fas fa-cog"></i>设置</h2>
+            <div class="grid">
+                <div>
+                    <label><i class="fas fa-shield-alt"></i>装备类型:</label>
+                    <select id="equipType">
+                        <option value="armor">防具\饰品</option>
+                        <option value="weapon">武器\副武器</option>
+                    </select>
+                </div>
+                <div>
+                    <label><i class="fas fa-coins"></i>魔方价格:</label>
+                    <input type="number" id="cubePrice" value="1" min="1">
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2><i class="fas fa-bullseye"></i>选择目标潜能 (最多3条)</h2>
+            <div class="grid">
+                <div>
+                    <label>主词条:</label>
+                    <select id="mainPotential"></select>
+                </div>
+                <div>
+                    <label>副词条1:</label>
+                    <select id="subPotential1"></select>
+                </div>
+                <div>
+                    <label>副词条2:</label>
+                    <select id="subPotential2"></select>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2><i class="fas fa-play"></i>模拟设置</h2>
+            <div class="grid">
+                <div>
+                    <label><i class="fas fa-redo"></i>模拟次数:</label>
+                    <input type="number" id="simTimes" value="1000" min="1">
+                </div>
+                <div>
+                    <button onclick="startSimulation()"><i class="fas fa-play"></i>开始模拟</button>
+                    <button onclick="resetSimulation()" style="background: #e74c3c;"><i class="fas fa-undo"></i>重置</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="results">
+            <h2><i class="fas fa-chart-bar"></i>模拟结果</h2>
+            <p id="averageCost"></p>
+            <p id="successRate"></p>
+            <div class="chart-container">
+                <canvas id="probChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="cumProbChart"></canvas>
+            </div>
+            <h3><i class="fas fa-history"></i>最近20次洗魔方结果</h3>
+            <div id="recentResults"></div>
+        </div>
+    </div>
+
+    <script>
+        const potentialPool = {
+            armor: {
+                B: {
+                    "STR%": 0.06, "DEX%": 0.06, "INT%": 0.06, "LUK%": 0.06,
+                    "最大HP%": 0.06, "其他": 0.7
+                },
+                A: {
+                    "STR%": 0.1, "DEX%": 0.1, "INT%": 0.1, "LUK%": 0.1,
+                    "最大HP%": 0.14, "其他": 0.46
+                }
+            },
+            weapon: {
+                B: {
+                    "STR%": 0.06, "DEX%": 0.06, "INT%": 0.06, "LUK%": 0.06,
+                    "最大HP%": 0.06, "物理攻击力%": 0.02, "魔法攻击力%": 0.02,
+                    "伤害%": 0.02, "暴击几率%": 0.02, "无视防御力%": 0.02,
+                    "其他": 0.68
+                },
+                A: {
+                    "STR%": 0.1, "DEX%": 0.1, "INT%": 0.1, "LUK%": 0.1,
+                    "最大HP%": 0.14, "物理攻击力%": 0.04, "魔法攻击力%": 0.04,
+                    "伤害%": 0.04, "暴击几率%": 0.04, "无视防御力%": 0.04,
+                    "其他": 0.26
+                }
+            }
+        };
+
+        const valueMap = {
+            "STR%": { B: 3, A: 6 }, "DEX%": { B: 3, A: 6 }, "INT%": { B: 3, A: 6 }, "LUK%": { B: 3, A: 6 },
+            "最大HP%": { B: 3, A: 6 }, "物理攻击力%": { B: 3, A: 6 }, "魔法攻击力%": { B: 3, A: 6 },
+            "伤害%": { B: 3, A: 6 }, "暴击几率%": { B: 4, A: 8 }, "无视防御力%": { B: 15, A: 15 }
+        };
+
+        let probChart, cumProbChart;
+
+        function updatePotentialOptions() {
+            const equipType = document.getElementById("equipType").value;
+            const mainSelect = document.getElementById("mainPotential");
+            const sub1Select = document.getElementById("subPotential1");
+            const sub2Select = document.getElementById("subPotential2");
+
+            mainSelect.innerHTML = '<option value="">请选择</option>';
+            sub1Select.innerHTML = '<option value="">请选择</option>';
+            sub2Select.innerHTML = '<option value="">请选择</option>';
+
+            const anyOption = document.createElement("option");
+            anyOption.value = "任意";
+            anyOption.text = "任意";
+            mainSelect.appendChild(anyOption.cloneNode(true));
+            sub1Select.appendChild(anyOption.cloneNode(true));
+            sub2Select.appendChild(anyOption.cloneNode(true));
+
+            const potentials = equipType === "armor" ? 
+                ["STR%", "DEX%", "INT%", "LUK%", "最大HP%"] : 
+                ["STR%", "DEX%", "INT%", "LUK%", "最大HP%", "物理攻击力%", "魔法攻击力%", "伤害%", "暴击几率%", "无视防御力%"];
+
+            potentials.forEach(pot => {
+                // 主潜能只显示 A 级
+                const aOption = document.createElement("option");
+                aOption.value = `${pot} (A级)`;
+                aOption.text = `${pot} (A级 ${valueMap[pot].A}%)`;
+                mainSelect.appendChild(aOption);
+
+                // 副潜能显示 B 级和 A 级
+                const bOption = document.createElement("option");
+                bOption.value = `${pot} (B级)`;
+                bOption.text = `${pot} (B级 ${valueMap[pot].B}%)`;
+                sub1Select.appendChild(bOption.cloneNode(true));
+                sub1Select.appendChild(aOption.cloneNode(true));
+                sub2Select.appendChild(bOption.cloneNode(true));
+                sub2Select.appendChild(aOption.cloneNode(true));
+            });
+        }
+
+        function rollPotential(equipType) {
+            let potentials = [];
+            const pool = potentialPool[equipType];
+            const bKeys = Object.keys(pool.B);
+            const bProbs = Object.values(pool.B);
+            const aKeys = Object.keys(pool.A);
+            const aProbs = Object.values(pool.A);
+            const bTotal = bProbs.reduce((a, b) => a + b, 0);
+            const aTotal = aProbs.reduce((a, b) => a + b, 0);
+            const bNormalizedProbs = bProbs.map(p => p / bTotal);
+            const aNormalizedProbs = aProbs.map(p => p / aTotal);
+
+            // 主词条 (必然 A 级)
+            let r = Math.random();
+            let sum = 0;
+            for (let j = 0; j < aKeys.length; j++) {
+                sum += aNormalizedProbs[j];
+                if (r <= sum) {
+                    potentials.push({ key: aKeys[j], level: "A" });
+                    break;
+                }
+            }
+
+            // 副词条 (99% B 级, 1% A 级)
+            for (let i = 0; i < 2; i++) {
+                const isA = Math.random() < 0.01; // 1% 变异为 A 级
+                const levelPool = isA ? pool.A : pool.B;
+                const keys = Object.keys(levelPool);
+                const probs = Object.values(levelPool);
+                const total = probs.reduce((a, b) => a + b, 0);
+                const normalizedProbs = probs.map(p => p / total);
+
+                r = Math.random();
+                sum = 0;
+                for (let j = 0; j < keys.length; j++) {
+                    sum += normalizedProbs[j];
+                    if (r <= sum) {
+                        potentials.push({ key: keys[j], level: isA ? "A" : "B" });
+                        break;
+                    }
+                }
+            }
+            return potentials;
+        }
+
+        function getPotentialValue(pot, level) {
+            return valueMap[pot] ? valueMap[pot][level] : 0;
+        }
+
+        function checkSuccess(result, targets) {
+            if (!targets.length) return false;
+
+            let targetValues = {};
+            targets.forEach(t => {
+                if (t !== "任意") {
+                    const [key, level] = t.split(" (");
+                    const cleanKey = key;
+                    const cleanLevel = level.replace(")", "").split("级")[0];
+                    targetValues[cleanKey] = (targetValues[cleanKey] || 0) + getPotentialValue(cleanKey, cleanLevel);
+                }
+            });
+
+            let resultValues = {};
+            result.forEach(r => {
+                if (r.key !== "其他") {
+                    resultValues[r.key] = (resultValues[r.key] || 0) + getPotentialValue(r.key, r.level);
+                }
+            });
+
+            const anyCount = targets.filter(t => t === "任意").length;
+            const specificTargets = targets.filter(t => t !== "任意");
+
+            if (specificTargets.length === 0) {
+                return result.filter(r => r.key !== "其他").length + anyCount >= targets.length;
+            }
+
+            for (let key in targetValues) {
+                if (!(key in resultValues) || resultValues[key] < targetValues[key]) {
+                    return false;
+                }
+            }
+
+            return result.filter(r => r.key !== "其他").length + anyCount >= targets.length && 
+                   Object.keys(targetValues).every(key => resultValues[key] >= targetValues[key]);
+        }
+
+        function startSimulation() {
+            const equipType = document.getElementById("equipType").value;
+            const cubePrice = parseInt(document.getElementById("cubePrice").value);
+            const simTimes = parseInt(document.getElementById("simTimes").value);
+            const targets = [
+                document.getElementById("mainPotential").value,
+                document.getElementById("subPotential1").value,
+                document.getElementById("subPotential2").value
+            ].filter(t => t);
+
+            if (targets.length === 0) {
+                alert("请至少选择一个目标潜能！");
+                return;
+            }
+
+            let totalCost = 0;
+            let successes = 0;
+            let costs = [];
+            let recentResults = [];
+
+            for (let i = 0; i < simTimes; i++) {
+                let cost = 0;
+                let achieved = false;
+
+                while (!achieved) {
+                    cost += cubePrice;
+                    const result = rollPotential(equipType);
+                    if (recentResults.length < 20) recentResults.push(result.map(r => `${r.key} (${r.level}级)`));
+                    else recentResults.shift() && recentResults.push(result.map(r => `${r.key} (${r.level}级)`));
+
+                    achieved = checkSuccess(result, targets);
+                }
+
+                totalCost += cost;
+                costs.push(cost);
+                if (achieved) successes++;
+            }
+
+            const avgCost = totalCost / simTimes;
+            const successRate = successes / simTimes * 100;
+
+            document.getElementById("averageCost").textContent = `平均花费: ${avgCost.toFixed(2)}`;
+            document.getElementById("successRate").textContent = `成功率: ${successRate.toFixed(2)}%`;
+
+            // 调整 bin 宽度
+            const binWidth = Math.ceil((Math.max(...costs) - Math.min(...costs)) / 20); // 将数据分成 20 个 bin
+            const costDist = {};
+            costs.forEach(c => {
+                const bin = Math.floor(c / binWidth) * binWidth;
+                costDist[bin] = (costDist[bin] || 0) + 1;
+            });
+            const labels = Object.keys(costDist).map(Number).sort((a, b) => a - b);
+            const data = labels.map(l => costDist[l] / simTimes);
+
+            const cumData = [];
+            let cumSum = 0;
+            labels.forEach((l, i) => {
+                cumSum += data[i];
+                cumData.push(cumSum);
+            });
+
+            if (probChart) probChart.destroy();
+            if (cumProbChart) cumProbChart.destroy();
+
+            probChart = new Chart(document.getElementById("probChart"), {
+                type: "bar",
+                data: {
+                    labels: labels.map(l => `${l}-${l + binWidth - 1}`),
+                    datasets: [{
+                        label: "概率分布",
+                        data: data,
+                        backgroundColor: "rgba(75, 192, 192, 0.2)",
+                        borderColor: "rgba(75, 192, 192, 1)",
+                        borderWidth: 1
+                    }]
+                },
+                options: { scales: { y: { beginAtZero: true } } }
+            });
+
+            cumProbChart = new Chart(document.getElementById("cumProbChart"), {
+                type: "line",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "累计概率分布",
+                        data: cumData,
+                        fill: false,
+                        borderColor: "rgba(255, 99, 132, 1)",
+                        tension: 0.1
+                    }]
+                },
+                options: { scales: { y: { beginAtZero: true, max: 1 } } }
+            });
+
+            const recentDiv = document.getElementById("recentResults");
+            recentDiv.innerHTML = recentResults.map(r => `<div>${r.join(", ")}</div>`).join("");
+        }
+
+        function resetSimulation() {
+            document.getElementById("averageCost").textContent = "";
+            document.getElementById("successRate").textContent = "";
+            document.getElementById("recentResults").innerHTML = "";
+            if (probChart) probChart.destroy();
+            if (cumProbChart) cumProbChart.destroy();
+            document.getElementById("simTimes").value = "1000";
+            document.getElementById("mainPotential").value = "";
+            document.getElementById("subPotential1").value = "";
+            document.getElementById("subPotential2").value = "";
+        }
+
+        document.getElementById("equipType").addEventListener("change", updatePotentialOptions);
+        updatePotentialOptions(); // 初始化下拉框
+    </script>
+</body>
+</html>
