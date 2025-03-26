@@ -390,23 +390,23 @@
         const potentialPool = {
             armor: {
                 B: {
-                    "STR%": 0.06, "DEX%": 0.06, "INT%": 0.06, "LUK%": 0.06,
+                    "力量%": 0.06, "敏捷%": 0.06, "智力%": 0.06, "运气%": 0.06,
                     "最大HP%": 0.06, "其他": 0.7
                 },
                 A: {
-                    "STR%": 0.1, "DEX%": 0.1, "INT%": 0.1, "LUK%": 0.1,
+                    "力量%": 0.1, "敏捷%": 0.1, "智力%": 0.1, "运气%": 0.1,
                     "最大HP%": 0.14, "其他": 0.46
                 }
             },
             weapon: {
                 B: {
-                    "STR%": 0.06, "DEX%": 0.06, "INT%": 0.06, "LUK%": 0.06,
+                    "力量%": 0.06, "敏捷%": 0.06, "智力%": 0.06, "运气%": 0.06,
                     "最大HP%": 0.06, "物理攻击力%": 0.02, "魔法攻击力%": 0.02,
                     "伤害%": 0.02, "暴击几率%": 0.02, "无视防御力%": 0.02,
                     "其他": 0.68
                 },
                 A: {
-                    "STR%": 0.1, "DEX%": 0.1, "INT%": 0.1, "LUK%": 0.1,
+                    "力量%": 0.1, "敏捷%": 0.1, "智力%": 0.1, "运气%": 0.1,
                     "最大HP%": 0.14, "物理攻击力%": 0.04, "魔法攻击力%": 0.04,
                     "伤害%": 0.04, "暴击几率%": 0.04, "无视防御力%": 0.04,
                     "其他": 0.26
@@ -415,7 +415,7 @@
         };
 
         const valueMap = {
-            "STR%": { B: 3, A: 6 }, "DEX%": { B: 3, A: 6 }, "INT%": { B: 3, A: 6 }, "LUK%": { B: 3, A: 6 },
+            "力量%": { B: 3, A: 6 }, "敏捷%": { B: 3, A: 6 }, "智力%": { B: 3, A: 6 }, "运气%": { B: 3, A: 6 },
             "最大HP%": { B: 3, A: 6 }, "物理攻击力%": { B: 3, A: 6 }, "魔法攻击力%": { B: 3, A: 6 },
             "伤害%": { B: 3, A: 6 }, "暴击几率%": { B: 4, A: 8 }, "无视防御力%": { B: 15, A: 15 }
         };
@@ -440,8 +440,8 @@
             sub2Select.appendChild(anyOption.cloneNode(true));
 
             const potentials = equipType === "armor" ? 
-                ["STR%", "DEX%", "INT%", "LUK%", "最大HP%"] : 
-                ["STR%", "DEX%", "INT%", "LUK%", "最大HP%", "物理攻击力%", "魔法攻击力%", "伤害%", "暴击几率%", "无视防御力%"];
+                ["力量%", "敏捷%", "智力%", "运气%", "最大HP%"] : 
+                ["力量%", "敏捷%", "智力%", "运气%", "最大HP%", "物理攻击力%", "魔法攻击力%", "伤害%", "暴击几率%", "无视防御力%"];
 
             potentials.forEach(pot => {
                 // 主潜能只显示 A 级
@@ -608,8 +608,8 @@
                 cumData.push(cumSum);
             });
 
-            if (probChart) probChart.destroy();
-            if (cumProbChart) cumProbChart.destroy();
+            if (probChart) probChart.de力量oy();
+            if (cumProbChart) cumProbChart.de力量oy();
 
             probChart = new Chart(document.getElementById("probChart"), {
                 type: "bar",
@@ -649,8 +649,8 @@
             document.getElementById("averageCost").textContent = "";
             document.getElementById("successRate").textContent = "";
             document.getElementById("recentResults").innerHTML = "";
-            if (probChart) probChart.destroy();
-            if (cumProbChart) cumProbChart.destroy();
+            if (probChart) probChart.de力量oy();
+            if (cumProbChart) cumProbChart.de力量oy();
             document.getElementById("simTimes").value = "1000";
             document.getElementById("mainPotential").value = "";
             document.getElementById("subPotential1").value = "";
