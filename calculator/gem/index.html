@@ -156,7 +156,7 @@ var _hmt = _hmt || [];
                 const prob = probTable[level];
                 cost += prob.cost;
                 levelHistory[level]++;
-
+				
                 const rand = Math.random();
                 if (rand < prob.success) {
                     level++;
@@ -277,15 +277,21 @@ var _hmt = _hmt || [];
         cumulativeChart.destroy();
     }
 
-    // 对成本进行排序
     costHistory.sort((a, b) => a - b);
 
-    // 计算累积概率分布
-    const step = Math.ceil((costHistory[costHistory.length - 1] - costHistory[0]) / 50);
+    // 处理单一值或范围为0的情况
+    const minCost = costHistory[0];
+    const maxCost = costHistory[costHistory.length - 1];
+    let step = Math.ceil((maxCost - minCost) / 50);
+    if (step === 0) {
+        // 如果成本范围为0，强制设置一个最小步长或直接绘制单一值
+        step = 1; // 或者可以直接跳过复杂计算，绘制单一值的累积概率
+    }
+
     const costBins = [];
     const cumulativeProb = [];
     
-    for (let cost = costHistory[0]; cost <= costHistory[costHistory.length - 1]; cost += step) {
+    for (let cost = minCost; cost <= maxCost; cost += step) {
         costBins.push(cost);
         const count = costHistory.filter(x => x <= cost).length;
         cumulativeProb.push((count / costHistory.length * 100).toFixed(2));
