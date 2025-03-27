@@ -64,7 +64,7 @@ var _hmt = _hmt || [];
                     <option value="7">7</option><option value="8">8</option><option value="9">9</option>
                     <option value="10" selected>10</option>
                 </select>
-                <label>追加等级 (0-10):</label>
+                <label>加工等级 (0-10):</label>
                 <select id="appendLevel">
                     <option value="0" selected>0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option>
                     <option value="4">4</option><option value="5">5</option><option value="6">6</option>
@@ -356,7 +356,7 @@ var _hmt = _hmt || [];
                         const sim = simulateOne(MAX_LEVEL, appendLevel);
                         totalAttr = sim.reduce((sum, r) => sum + r.final, 0);
                         resets++;
-                        if (resets > 1000) break;
+                        if (resets > 10000) break;
                     }
                     resetCounts.push(resets);
                 }
