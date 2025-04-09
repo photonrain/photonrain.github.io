@@ -14,7 +14,7 @@ var _hmt = _hmt || [];
     <title>冒险岛怪怪卡模拟器</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
-		synthesis-panel {
+        synthesis-panel {
             background: #fff3e0;
             padding: 15px;
             border-radius: 10px;
@@ -186,8 +186,6 @@ var _hmt = _hmt || [];
         <h4 style="text-align: center; margin-bottom: 5px;">    by 紫电NS
             <a href="https://photonrain.github.io/" class="ms-3" style="color: #3498db; text-decoration: none;">网站首页</a>
         <h4 style="text-align: center; margin-bottom: 5px;">    品质概率统计了300余次抽卡结果得到 
-    
-        
     </div>
 
     <div class="control-panel">
@@ -204,7 +202,7 @@ var _hmt = _hmt || [];
             </select>
             <select id="targetQuality">
                 <option value="any">任意品质</option>
-                <option value="B">B级</option>
+                
                 <option value="A">A级</option>
                 <option value="S">S级</option>
                 <option value="SS">SS级</option>
@@ -225,7 +223,7 @@ var _hmt = _hmt || [];
                 <div class="stat-value" id="totalCost">0</div>
             </div>
         </div>
-		<!-- 新增合成面板 -->
+        <!-- 新增合成面板 -->
         <div class="synthesis-panel" id="synthesisPanel" style="display:none;">
             <div style="margin-bottom: 10px;">
                 <button class="btn-warning" onclick="toggleAutoSynthesis()" id="autoSynthesisBtn">⚙️ 启用自动合成</button>
@@ -273,7 +271,7 @@ var _hmt = _hmt || [];
                 <tr id="特殊S"><td>特殊</td><td>S</td><td>0</td></tr>
                 <tr id="特殊SS"><td>特殊</td><td>SS</td><td>0</td></tr>
                 <!-- 傲天系列 -->
-                <tr id="傲天B"><td>傲天</td><td>B</td><td>0</td></tr>
+                
                 <tr id="傲天A"><td>傲天</td><td>A</td><td>0</td></tr>
                 <tr id="傲天S"><td>傲天</td><td>S</td><td>0</td></tr>
                 <tr id="傲天SS"><td>傲天</td><td>SS</td><td>0</td></tr>
@@ -306,15 +304,15 @@ var _hmt = _hmt || [];
     </div>
 
     <script>
-	document.addEventListener('DOMContentLoaded', () => {
-    updateSynthesisVisibility();
-});
+        document.addEventListener('DOMContentLoaded', () => {
+            updateSynthesisVisibility();
+        });
         let isDrawing = false;
         let totalDraws = 0;
         let isFastMode = false;
         let costPerDraw = 1000;
         let allResults = [];
-		
+        
         const combinationStats = {
             '普通B': { count: 0 },
             '普通A': { count: 0 },
@@ -329,7 +327,7 @@ var _hmt = _hmt || [];
             '傲天S': { count: 0 },
             '傲天SS': { count: 0 }
         };
-		// 新增合成相关变量
+        // 新增合成相关变量
         let isAutoSynthesis = false;
         let inventory = { B: 0, A: 0, S: 0, SS: 0 };
         let synthesizedSS = false;
@@ -339,20 +337,20 @@ var _hmt = _hmt || [];
         document.getElementById('targetQuality').addEventListener('change', updateSynthesisVisibility);
 
         function updateSynthesisVisibility() {
-			const panel = document.getElementById('synthesisPanel');
-			const targetType = document.getElementById('targetType').value;
-			const targetQuality = document.getElementById('targetQuality').value;
-			
-			// 仅当同时选择傲天和SS时显示
-			panel.style.display = (targetType === '傲天' && targetQuality === 'SS') ? 'block' : 'none';
-			
-			// 如果不符合条件时强制关闭自动合成
-			if (panel.style.display === 'none') {
-				isAutoSynthesis = false;
-				document.getElementById('autoSynthesisBtn').textContent = '⚙️ 启用自动合成';
-				document.getElementById('autoSynthesisBtn').style.backgroundColor = '#f9c74f';
-			}
-		}
+            const panel = document.getElementById('synthesisPanel');
+            const targetType = document.getElementById('targetType').value;
+            const targetQuality = document.getElementById('targetQuality').value;
+            
+            // 仅当同时选择傲天和SS时显示
+            panel.style.display = (targetType === '傲天' && targetQuality === 'SS') ? 'block' : 'none';
+            
+            // 如果不符合条件时强制关闭自动合成
+            if (panel.style.display === 'none') {
+                isAutoSynthesis = false;
+                document.getElementById('autoSynthesisBtn').textContent = '⚙️ 启用自动合成';
+                document.getElementById('autoSynthesisBtn').style.backgroundColor = '#f9c74f';
+            }
+        }
 
         // 切换自动合成
         function toggleAutoSynthesis() {
@@ -361,6 +359,7 @@ var _hmt = _hmt || [];
             btn.textContent = isAutoSynthesis ? '⚙️ 自动合成(ON)' : '⚙️ 启用自动合成';
             btn.style.backgroundColor = isAutoSynthesis ? '#f9844a' : '#f9c74f';
         }
+
         function getRandomType() {
             const rand = Math.random() * 100;
             if (rand < 98.794) return '普通';
@@ -368,8 +367,15 @@ var _hmt = _hmt || [];
             return '傲天';
         }
 
-        function getRandomQuality() {
+        function getRandomQuality(type) {
             const rand = Math.random() * 100;
+            // 如果是傲天，最低品质为A
+            if (type === '傲天') {
+                if (rand < 92.3809) return 'A';  // A级: 51.746% + 40.6349%
+                if (rand < 92.3809 + 6.6667) return 'S';  // S级: 6.6667%
+                return 'SS';  // SS级: 0.9524%
+            }
+            // 其他类型保持原有概率
             if (rand < 40.6349) return 'B';
             if (rand < 40.6349 + 51.746) return 'A';
             if (rand < 40.6349 + 51.746 + 6.6667) return 'S';
@@ -377,20 +383,20 @@ var _hmt = _hmt || [];
         }
 
         function toggleFastMode() {
-			isFastMode = !isFastMode;
-			const btn = document.getElementById('fastModeBtn');
-			btn.style.backgroundColor = isFastMode ? '#f9844a' : '#f9c74f';
-			btn.textContent = isFastMode ? '🚀 极速模式(ON)' : '🚀 极速模式';
-			
-			// 新增：控制最近抽取记录的显示
-			document.getElementById('recentCard').style.display = isFastMode ? 'none' : 'block';
-			
-			// 新增：清空已有记录
-			if(isFastMode) {
-				allResults = [];
-				updateRecentTable();
-			}
-		}
+            isFastMode = !isFastMode;
+            const btn = document.getElementById('fastModeBtn');
+            btn.style.backgroundColor = isFastMode ? '#f9844a' : '#f9c74f';
+            btn.textContent = isFastMode ? '🚀 极速模式(ON)' : '🚀 极速模式';
+            
+            // 新增：控制最近抽取记录的显示
+            document.getElementById('recentCard').style.display = isFastMode ? 'none' : 'block';
+            
+            // 新增：清空已有记录
+            if(isFastMode) {
+                allResults = [];
+                updateRecentTable();
+            }
+        }
 
         function updateStats() {
             document.getElementById('totalDraws').textContent = totalDraws;
@@ -420,37 +426,38 @@ var _hmt = _hmt || [];
 
         // 修改后的addResult函数
         function addResult(result) {
-			totalDraws++;
-			costPerDraw = parseInt(document.getElementById('costPerDraw').value) || 0;
-			
-			// 如果是傲天卡且开启合成
-			if (result.type === '傲天' && isAutoSynthesis) {
-				inventory[result.quality]++;
-				updateInventoryDisplay();
-				checkSynthesis();
-			}
+            totalDraws++;
+            costPerDraw = parseFloat(document.getElementById('costPerDraw').value) || 0;
+            
+            // 如果是傲天卡且开启合成
+            if (result.type === '傲天' && isAutoSynthesis) {
+                inventory[result.quality]++;
+                updateInventoryDisplay();
+                checkSynthesis();
+            }
 
-			// 更新组合统计
-			const comboKey = `${result.type}${result.quality}`;
-			combinationStats[comboKey].count++;
-			updateCombinationStats(comboKey);
-			
-			// 修改：仅在非极速模式记录最近抽取
-			if(!isFastMode) {
-				allResults.unshift({
-					...result,
-					time: new Date().toLocaleTimeString()
-				});
-				if (allResults.length > 10) allResults.pop();
-				updateRecentTable();
-			}
-			
-			updateStats();
+            // 更新组合统计
+            const comboKey = `${result.type}${result.quality}`;
+            combinationStats[comboKey].count++;
+            updateCombinationStats(comboKey);
+            
+            // 修改：仅在非极速模式记录最近抽取
+            if(!isFastMode) {
+                allResults.unshift({
+                    ...result,
+                    time: new Date().toLocaleTimeString()
+                });
+                if (allResults.length > 10) allResults.pop();
+                updateRecentTable();
+            }
+            
+            updateStats();
 
-			// 返回是否通过合成得到SS
-			return synthesizedSS;
-		}
-		function checkSynthesis() {
+            // 返回是否通过合成得到SS
+            return synthesizedSS;
+        }
+
+        function checkSynthesis() {
             let updated = true;
             while(updated) {
                 updated = false;
@@ -506,93 +513,95 @@ var _hmt = _hmt || [];
                 setTimeout(() => div.remove(), 2000);
             }
         }
+
         async function draw(times = 1) {
-			if (isDrawing) return;
-			isDrawing = true;
-			
-			for (let i = 0; i < times && isDrawing; i++) {
-				const result = {
-					type: getRandomType(),
-					quality: getRandomQuality()
-				};
-				
-				addResult(result);
-				
-				if (!isFastMode) {
-					await new Promise(r => setTimeout(r, 30));
-					updateRecentTable();
-					updateStats();
-				}
-			}
-			
-			if (isFastMode) {
-				updateRecentTable();
-				updateStats();
-			}
-			
-			isDrawing = false;
-		}
+            if (isDrawing) return;
+            isDrawing = true;
+            
+            for (let i = 0; i < times && isDrawing; i++) {
+                const type = getRandomType();
+                const result = {
+                    type: type,
+                    quality: getRandomQuality(type)
+                };
+                
+                addResult(result);
+                
+                if (!isFastMode) {
+                    await new Promise(r => setTimeout(r, 30));
+                    updateRecentTable();
+                    updateStats();
+                }
+            }
+            
+            if (isFastMode) {
+                updateRecentTable();
+                updateStats();
+            }
+            
+            isDrawing = false;
+        }
 
         async function startTargetDraw() {
-    updateSynthesisVisibility();
-    isDrawing = true;
-    const targetType = document.getElementById('targetType').value;
-    const targetQuality = document.getElementById('targetQuality').value;
-    const enableSynthesis = (targetType === '傲天' && targetQuality === 'SS');
-    const shouldFastMode = isFastMode; // 修改这行
-    const delay = shouldFastMode ? 0 : 30;
+            updateSynthesisVisibility();
+            isDrawing = true;
+            const targetType = document.getElementById('targetType').value;
+            const targetQuality = document.getElementById('targetQuality').value;
+            const enableSynthesis = (targetType === '傲天' && targetQuality === 'SS');
+            const shouldFastMode = isFastMode;
+            const delay = shouldFastMode ? 0 : 30;
 
-    while(isDrawing) {
-        const result = {
-            type: getRandomType(),
-            quality: getRandomQuality()
-        };
-        
-        const isSSSynthesized = addResult(result);
+            while(isDrawing) {
+                const type = getRandomType();
+                const result = {
+                    type: type,
+                    quality: getRandomQuality(type)
+                };
+                
+                const isSSSynthesized = addResult(result);
 
-        const typeMatch = targetType === 'any' || result.type === targetType;
-        const qualityMatch = targetQuality === 'any' || result.quality === targetQuality;
-        
-        if ((typeMatch && qualityMatch) || (enableSynthesis && isSSSynthesized)) {
+                const typeMatch = targetType === 'any' || result.type === targetType;
+                const qualityMatch = targetQuality === 'any' || result.quality === targetQuality;
+                
+                if ((typeMatch && qualityMatch) || (enableSynthesis && isSSSynthesized)) {
+                    isDrawing = false;
+                    alert(`🎉 成功在第${totalDraws}抽获得目标！\n类型：${result.type}\n品质：${result.quality}`);
+                    break;
+                }
+                
+                if (!shouldFastMode) {
+                    await new Promise(r => setTimeout(r, delay));
+                }
+            }
             isDrawing = false;
-            alert(`🎉 成功在第${totalDraws}抽获得目标！\n类型：${result.type}\n品质：${result.quality}`);
-            break;
         }
-        
-        if (!shouldFastMode) {
-            await new Promise(r => setTimeout(r, delay));
-        }
-    }
-    isDrawing = false;
-}
 
         function stopDrawing() {
             isDrawing = false;
         }
 
         function resetData() {
-            results = [];
-    totalDraws = 0;
-    allResults = [];
-    inventory = { B: 0, A: 0, S: 0, SS: 0 }; // 重置库存
-    synthesizedSS = false; // 重置合成状态
-    
-    // 重置组合统计
-    Object.keys(combinationStats).forEach(key => {
-        combinationStats[key].count = 0;
-        updateCombinationStats(key);
-    });
-    
-    isDrawing = false; // 确保停止当前抽卡
-    
-    // 更新显示
-    updateInventoryDisplay();
-    updateRecentTable();
-    updateStats();
-    updateSynthesisVisibility();
-    
-    // 重置抽卡价格为默认值
-    document.getElementById('costPerDraw').value = '2.6';
+            totalDraws = 0;
+            allResults = [];
+            inventory = { B: 0, A: 0, S: 0, SS: 0 }; // 重置库存
+            synthesizedSS = false; // 重置合成状态
+            
+            // 重置组合统计
+            Object.keys(combinationStats).forEach(key => {
+                combinationStats[key].count = 0;
+                updateCombinationStats(key);
+            });
+            
+            isDrawing = false; // 确保停止当前抽卡
+            
+            // 更新显示
+            updateInventoryDisplay();
+            updateRecentTable();
+            updateStats();
+            updateSynthesisVisibility();
+            
+            // 重置抽卡价格为默认值
+            document.getElementById('costPerDraw').value = '2.6';
         }
     </script>
 </body>
