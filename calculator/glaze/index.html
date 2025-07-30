@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>琉璃战斗装强化模拟器</title>
+    <h4 style="text-align: center; margin-bottom: 5px;">    如遇BUG请联系bilibili 紫电NS
+            <a href="https://photonrain.github.io/" class="ms-3" style="color: #3498db; text-decoration: none;">网站首页</a>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-start p-4 font-sans">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">
+            <i class="fas fa-gem mr-2 text-blue-600"></i> 琉璃战斗装强化模拟器
+        </h1>
+
+        <!-- 当前物品状态 -->
+        <div class="mb-6 text-center">
+            <h2 class="text-2xl font-semibold text-gray-700">
+                <i class="fas fa-shield-alt mr-2 text-gray-600"></i> 当前物品
+            </h2>
+            <div id="currentStage" class="text-4xl font-bold text-blue-600 mt-2">阶段 1</div>
+            <div id="currentAttributes" class="text-2xl text-gray-600 mt-2"></div>
+        </div>
+
+        <!-- 强化按钮 -->
+        <div class="flex justify-center space-x-4 mb-6">
+            <button onclick="enhance(1)" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded transition flex items-center">
+                <i class="fas fa-bolt mr-2"></i> 强化 x1
+            </button>
+            <button onclick="enhance(10)" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded transition flex items-center">
+                <i class="fas fa-bolt mr-2"></i> 强化 x10
+            </button>
+            <button onclick="enhance(100)" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded transition flex items-center">
+                <i class="fas fa-bolt mr-2"></i> 强化 x100
+            </button>
+            <button onclick="reset()" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded transition flex items-center">
+                <i class="fas fa-undo mr-2"></i> 重置
+            </button>
+        </div>
+
+        <!-- 总计尝试与金额 -->
+        <div class="mb-6 text-center">
+            <h2 class="text-xl font-semibold text-gray-700">
+                <i class="fas fa-coins mr-2 text-yellow-500"></i> 总计
+            </h2>
+            <div class="flex justify-center items-center space-x-4">
+                <label for="costPerAttempt" class="text-gray-600">单次强化金额:</label>
+                <input id="costPerAttempt" type="number" value="12" min="1" class="border p-2 rounded w-24 text-center" onchange="updateTotalCost()">
+                <div id="totalAttempts" class="text-gray-600">总尝试次数: 0</div>
+                <div id="totalCost" class="text-gray-600">总金额: 0</div>
+            </div>
+        </div>
+
+        <!-- 目标选择与模拟 -->
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold text-gray-700">
+                <i class="fas fa-bullseye mr-2 text-orange-500"></i> 目标模拟
+            </h2>
+            <div class="flex space-x-4 mb-4">
+                <select id="targetStage" onchange="updateAttributeOptions()" class="border p-2 rounded">
+                    <option value="1">阶段 1</option>
+                    <option value="2">阶段 2</option>
+                    <option value="3">阶段 3</option>
+                    <option value="4">阶段 4</option>
+                </select>
+                <select id="targetAttributes" class="border p-2 rounded w-64"></select>
+                <button onclick="simulateToTarget()" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded transition flex items-center">
+                    <i class="fas fa-play mr-2"></i> 模拟至目标
+                </button>
+            </div>
+            <div id="simulationResult" class="text-gray-600 text-2xl font-semibold"></div>
+        </div>
+
+        <!-- 最近强化记录 -->
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold text-gray-700">
+                <i class="fas fa-history mr-2 text-gray-600"></i> 最近5次强化
+            </h2>
+            <div id="recentEnhancements" class="bg-gray-50 p-4 rounded-lg h-32 overflow-y-auto text-gray-600"></div>
+        </div>
+
+        <!-- 强化概率 -->
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold text-gray-700">
+                <i class="fas fa-dice mr-2 text-gray-600"></i> 强化概率
+            </h2>
+            <ul class="list-disc list-inside text-gray-600">
+                <li>阶段 1 → 阶段 1: 98% | 阶段 1 → 阶段 2: 2%</li>
+                <li>阶段 2 → 阶段 2: 99.5% | 阶段 2 → 阶段 3: 0.5%</li>
+                <li>阶段 3 → 阶段 3: 99.9% | 阶段 3 → 阶段 4: 0.1%</li>
+            </ul>
+        </div>
+
+        <!-- 属性表 -->
+        <div>
+            <h2 class="text-xl font-semibold text-gray-700">
+                <i class="fas fa-table mr-2 text-gray-600"></i> 属性表
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="border p-2">阶段</th>
+                            <th class="border p-2">力量</th>
+                            <th class="border p-2">敏捷</th>
+                            <th class="border p-2">智力</th>
+                            <th class="border p-2">运气</th>
+                            <th class="border p-2">HP</th>
+                            <th class="border p-2">全属性</th>
+                            <th class="border p-2">攻击力</th>
+                            <th class="border p-2">魔法力</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attributeTable" class="text-gray-600">
+                        <tr><td class="border p-2">4</td><td class="border p-2">20</td><td class="border p-2">20</td><td class="border p-2">20</td><td class="border p-2">20</td><td class="border p-2">300</td><td class="border p-2">20</td><td class="border p-2">20</td><td class="border p-2">20</td></tr>
+                        <tr><td class="border p-2">4</td><td class="border p-2">15</td><td class="border p-2">15</td><td class="border p-2">15</td><td class="border p-2">15</td><td class="border p-2">250</td><td class="border p-2">15</td><td class="border p-2">15</td><td class="border p-2">15</td></tr>
+                        <tr><td class="border p-2">4</td><td class="border p-2">13</td><td class="border p-2">13</td><td class="border p-2">13</td><td class="border p-2">13</td><td class="border p-2">230</td><td class="border p-2">13</td><td class="border p-2">13</td><td class="border p-2">13</td></tr>
+                        <tr><td class="border p-2">3</td><td class="border p-2">10</td><td class="border p-2">10</td><td class="border p-2">10</td><td class="border p-2">10</td><td class="border p-2">200</td><td class="border p-2">10</td><td class="border p-2">10</td><td class="border p-2">10</td></tr>
+                        <tr><td class="border p-2">3</td><td class="border p-2">8</td><td class="border p-2">8</td><td class="border p-2">8</td><td class="border p-2">8</td><td class="border p-2">160</td><td class="border p-2">8</td><td class="border p-2">8</td><td class="border p-2">8</td></tr>
+                        <tr><td class="border p-2">3</td><td class="border p-2">6</td><td class="border p-2">6</td><td class="border p-2">6</td><td class="border p-2">6</td><td class="border p-2">120</td><td class="border p-2">6</td><td class="border p-2">6</td><td class="border p-2">6</td></tr>
+                        <tr><td class="border p-2">2</td><td class="border p-2">5</td><td class="border p-2">5</td><td class="border p-2">5</td><td class="border p-2">5</td><td class="border p-2">100</td><td class="border p-2">5</td><td class="border p-2">5</td><td class="border p-2">5</td></tr>
+                        <tr><td class="border p-2">2</td><td class="border p-2">3</td><td class="border p-2">3</td><td class="border p-2">3</td><td class="border p-2">3</td><td class="border p-2">50</td><td class="border p-2">3</td><td class="border p-2">3</td><td class="border p-2">3</td></tr>
+                        <tr><td class="border p-2">1</td><td class="border p-2">2</td><td class="border p-2">2</td><td class="border p-2">2</td><td class="border p-2">2</td><td class="border p-2">30</td><td class="border p-2">2</td><td class="border p-2">2</td><td class="border p-2">2</td></tr>
+                        <tr><td class="border p-2">1</td><td class="border p-2">1</td><td class="border p-2">1</td><td class="border p-2">1</td><td class="border p-2">1</td><td class="border p-2">15</td><td class="border p-2">1</td><td class="border p-2">1</td><td class="border p-2">1</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const attributesTable = [
+            { stage: 4, strength: 20, dexterity: 20, intelligence: 20, luck: 20, hp: 300, allStats: 20, attack: 20, magic: 20 },
+            { stage: 4, strength: 15, dexterity: 15, intelligence: 15, luck: 15, hp: 250, allStats: 15, attack: 15, magic: 15 },
+            { stage: 4, strength: 13, dexterity: 13, intelligence: 13, luck: 13, hp: 230, allStats: 13, attack: 13, magic: 13 },
+            { stage: 3, strength: 10, dexterity: 10, intelligence: 10, luck: 10, hp: 200, allStats: 10, attack: 10, magic: 10 },
+            { stage: 3, strength: 8, dexterity: 8, intelligence: 8, luck: 8, hp: 160, allStats: 8, attack: 8, magic: 8 },
+            { stage: 3, strength: 6, dexterity: 6, intelligence: 6, luck: 6, hp: 120, allStats: 6, attack: 6, magic: 6 },
+            { stage: 2, strength: 5, dexterity: 5, intelligence: 5, luck: 5, hp: 100, allStats: 5, attack: 5, magic: 5 },
+            { stage: 2, strength: 3, dexterity: 3, intelligence: 3, luck: 3, hp: 50, allStats: 3, attack: 3, magic: 3 },
+            { stage: 1, strength: 2, dexterity: 2, intelligence: 2, luck: 2, hp: 30, allStats: 2, attack: 2, magic: 2 },
+            { stage: 1, strength: 1, dexterity: 1, intelligence: 1, luck: 1, hp: 15, allStats: 1, attack: 1, magic: 1 }
+        ];
+
+        const probabilities = {
+            1: { 1: 0.98, 2: 0.02 },
+            2: { 2: 0.995, 3: 0.005 },
+            3: { 3: 0.999, 4: 0.001 }
+        };
+
+        const attrNamesMap = {
+            strength: '力量',
+            dexterity: '敏捷',
+            intelligence: '智力',
+            luck: '运气',
+            hp: 'HP',
+            allStats: '全属性',
+            attack: '攻击力',
+            magic: '魔法力'
+        };
+
+        let currentStage = 1;
+        let currentAttributes = [];
+        let recentEnhancements = [];
+        let totalAttempts = 0;
+
+        function getRandomAttributes(stage) {
+            const possibleAttrs = attributesTable.filter(attr => attr.stage === stage);
+            const attrNames = ['strength', 'dexterity', 'intelligence', 'luck', 'hp', 'allStats', 'attack', 'magic'];
+            const selectedAttrs = [];
+            const selectedRow = possibleAttrs[Math.floor(Math.random() * possibleAttrs.length)];
+            for (let i = 0; i < 3; i++) {
+                const attrName = attrNames[Math.floor(Math.random() * attrNames.length)];
+                selectedAttrs.push({ name: attrName, value: selectedRow[attrName] });
+            }
+            return selectedAttrs;
+        }
+
+        function enhanceSingle() {
+            const prob = probabilities[currentStage];
+            if (!prob) return currentStage;
+            const rand = Math.random();
+            let newStage = currentStage;
+            let cumulative = 0;
+            for (let stage in prob) {
+                cumulative += prob[stage];
+                if (rand < cumulative) {
+                    newStage = parseInt(stage);
+                    break;
+                }
+            }
+            return newStage;
+        }
+
+        function enhance(count) {
+            let results = [];
+            for (let i = 0; i < count; i++) {
+                const oldStage = currentStage;
+                currentStage = enhanceSingle();
+                currentAttributes = getRandomAttributes(currentStage);
+                totalAttempts++;
+                const result = `尝试 ${recentEnhancements.length + 1}: 阶段 ${oldStage} → 阶段 ${currentStage}, 属性: ${currentAttributes.map(a => `${attrNamesMap[a.name]}: ${a.value}`).join(', ')}`;
+                results.push(result);
+                recentEnhancements.push(result);
+                if (recentEnhancements.length > 5) recentEnhancements.shift();
+            }
+
+            document.getElementById('currentStage').textContent = `阶段 ${currentStage}`;
+            document.getElementById('currentAttributes').textContent = currentAttributes.map(a => `${attrNamesMap[a.name]}: ${a.value}`).join(', ');
+            document.getElementById('recentEnhancements').innerHTML = recentEnhancements.map(r => `<div>${r}</div>`).join('');
+            updateTotalCost();
+        }
+
+        function reset() {
+            currentStage = 1;
+            currentAttributes = getRandomAttributes(currentStage);
+            recentEnhancements = [];
+            totalAttempts = 0;
+            document.getElementById('currentStage').textContent = `阶段 ${currentStage}`;
+            document.getElementById('currentAttributes').textContent = currentAttributes.map(a => `${attrNamesMap[a.name]}: ${a.value}`).join(', ');
+            document.getElementById('recentEnhancements').innerHTML = '';
+            document.getElementById('simulationResult').textContent = '';
+            updateTotalCost();
+        }
+
+        function updateTotalCost() {
+            const costPerAttempt = parseInt(document.getElementById('costPerAttempt').value) || 12;
+            document.getElementById('totalAttempts').textContent = `总尝试次数: ${totalAttempts}`;
+            document.getElementById('totalCost').textContent = `总金额: ${totalAttempts * costPerAttempt}`;
+        }
+
+        function updateAttributeOptions() {
+            const stage = parseInt(document.getElementById('targetStage').value);
+            const possibleAttrs = attributesTable.filter(attr => attr.stage === stage);
+            const attrNames = ['strength', 'dexterity', 'intelligence', 'luck', 'hp', 'allStats', 'attack', 'magic'];
+            const combinations = [{ display: '任意', stage: stage, attributes: null }];
+
+            possibleAttrs.forEach(row => {
+                const rowCombinations = [];
+                attrNames.forEach(a1 => {
+                    attrNames.forEach(a2 => {
+                        attrNames.forEach(a3 => {
+                            const combo = [
+                                { name: a1, value: row[a1] },
+                                { name: a2, value: row[a2] },
+                                { name: a3, value: row[a3] }
+                            ];
+                            rowCombinations.push({
+                                display: combo.map(a => `${attrNamesMap[a.name]}: ${a.value}`).join(', '),
+                                stage: stage,
+                                attributes: combo,
+                                sameAttr: a1 === a2 && a2 === a3
+                            });
+                        });
+                    });
+                });
+                rowCombinations.sort((a, b) => {
+                    if (a.sameAttr && !b.sameAttr) return -1;
+                    if (!a.sameAttr && b.sameAttr) return 1;
+                    return a.display.localeCompare(b.display, 'zh-CN');
+                });
+                combinations.push(...rowCombinations);
+            });
+
+            const select = document.getElementById('targetAttributes');
+            select.innerHTML = combinations.map(c => `<option value='${JSON.stringify(c)}'>${c.display}</option>`).join('');
+        }
+
+        function simulateToTarget() {
+            const target = JSON.parse(document.getElementById('targetAttributes').value);
+            const targetStage = target.stage;
+            let attempts = 0;
+            let tempStage = currentStage;
+            let tempAttributes = [...currentAttributes];
+            const maxAttempts = 1000000;
+
+            if (tempStage >= targetStage) {
+                if (!target.attributes || tempAttributes.every((attr, idx) => attr.name === target.attributes[idx].name && attr.value === target.attributes[idx].value)) {
+                    document.getElementById('simulationResult').textContent = `达到目标共尝试 0 次`;
+                    updateTotalCost();
+                    return;
+                }
+            }
+
+            while (attempts < maxAttempts) {
+                if (tempStage < targetStage) {
+                    const prob = probabilities[tempStage];
+                    if (!prob) break;
+                    const rand = Math.random();
+                    let cumulative = 0;
+                    for (let stage in prob) {
+                        cumulative += prob[stage];
+                        if (rand < cumulative) {
+                            tempStage = parseInt(stage);
+                            break;
+                        }
+                    }
+                }
+                tempAttributes = getRandomAttributes(tempStage);
+                attempts++;
+                totalAttempts++;
+
+                if (attempts % 1000 === 0 || (tempStage === targetStage && (!target.attributes || tempAttributes.every((attr, idx) => attr.name === target.attributes[idx].name && attr.value === target.attributes[idx].value)))) {
+                    const result = `模拟尝试 ${recentEnhancements.length + 1}: 阶段 ${tempStage}, 属性: ${tempAttributes.map(a => `${attrNamesMap[a.name]}: ${a.value}`).join(', ')}`;
+                    recentEnhancements.push(result);
+                    if (recentEnhancements.length > 5) recentEnhancements.shift();
+                    document.getElementById('recentEnhancements').innerHTML = recentEnhancements.map(r => `<div>${r}</div>`).join('');
+                }
+
+                if (tempStage === targetStage && (!target.attributes || tempAttributes.every((attr, idx) => attr.name === target.attributes[idx].name && attr.value === target.attributes[idx].value))) {
+                    currentStage = tempStage;
+                    currentAttributes = tempAttributes;
+                    document.getElementById('currentStage').textContent = `阶段 ${currentStage}`;
+                    document.getElementById('currentAttributes').textContent = currentAttributes.map(a => `${attrNamesMap[a.name]}: ${a.value}`).join(', ');
+                    document.getElementById('simulationResult').textContent = `达到目标共尝试 ${attempts} 次`;
+                    updateTotalCost();
+                    return;
+                }
+            }
+
+            document.getElementById('simulationResult').textContent = `未能在 ${maxAttempts} 次内达到目标`;
+            updateTotalCost();
+        }
+
+        // 初始化
+        currentAttributes = getRandomAttributes(currentStage);
+        document.getElementById('currentStage').textContent = `阶段 ${currentStage}`;
+        document.getElementById('currentAttributes').textContent = currentAttributes.map(a => `${attrNamesMap[a.name]}: ${a.value}`).join(', ');
+        updateAttributeOptions();
+        updateTotalCost();
+    </script>
+</body>
+</html>
