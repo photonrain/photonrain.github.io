@@ -8,8 +8,7 @@
             <a href="https://photonrain.github.io/" class="ms-3" style="color: #3498db; text-decoration: none;">网站首页</a>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-</head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-start p-4 font-sans">
+</head><body class="bg-gray-100 min-h-screen flex flex-col items-center justify-start p-4 font-sans">
     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl">
         <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">
             <i class="fas fa-gem mr-2 text-blue-600"></i> 琉璃战斗装强化模拟器
@@ -170,9 +169,9 @@
             const possibleAttrs = attributesTable.filter(attr => attr.stage === stage);
             const attrNames = ['strength', 'dexterity', 'intelligence', 'luck', 'hp', 'allStats', 'attack', 'magic'];
             const selectedAttrs = [];
-            const selectedRow = possibleAttrs[Math.floor(Math.random() * possibleAttrs.length)];
             for (let i = 0; i < 3; i++) {
                 const attrName = attrNames[Math.floor(Math.random() * attrNames.length)];
+                const selectedRow = possibleAttrs[Math.floor(Math.random() * possibleAttrs.length)];
                 selectedAttrs.push({ name: attrName, value: selectedRow[attrName] });
             }
             return selectedAttrs;
@@ -258,7 +257,7 @@
                 });
                 rowCombinations.sort((a, b) => {
                     if (a.sameAttr && !b.sameAttr) return -1;
-                    if (!a.sameAttr && b.sameAttr) return 1;
+                    if (!b.sameAttr && a.sameAttr) return 1;
                     return a.display.localeCompare(b.display, 'zh-CN');
                 });
                 combinations.push(...rowCombinations);
